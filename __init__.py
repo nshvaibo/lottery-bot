@@ -1,0 +1,1 @@
+"""Crypto lottery bot"""

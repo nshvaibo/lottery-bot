@@ -1,26 +1,130 @@
 """Manipulation of client data: wallet, lottery tickets"""
-import json
+from copy import deepcopy
+from threading import Lock
+from typing import Tuple
+from weakref import WeakValueDictionary
 
-from db import db
+from db import db, firestore
 
 
-def is_known(user_id):
-    """Returns True if <user_id> is an existing user of the bot"""
-    doc_ref = db.collection(u"users").document(str(user_id))
+class Mutex:
+    """Provides an RAII mutex for each user"""
+    # Mutex for protecting locks for each individual user
+    user_lock = Lock()
+    
+    # Map of user IDs to their corresponding mutexes if they exist
+    locks = WeakValueDictionary()
 
-    doc = doc_ref.get()
-    if doc.exists:
-        print(f'Document data: {doc.to_dict()}')
-    else:
-        print(u'No such document!')
+    def __init__(self, user_id) -> None:
+        Mutex.user_lock.acquire()
 
-def add_user(user_id):
-    """Initialize state for a new user"""
-    f = open("db.json", "r")
-    db = json.load(f)
-    f.close()
+        # Check if there is a lock for this user
+        if user_id in Mutex.locks:
+            self.m = Mutex.locks[user_id]
+        else: # Otherwise create a new lock
+            self.m = Lock()
+            Mutex.locks[user_id] = self.m
 
-    f = open("db.json", "w")
-    db["known_users"].append(user_id)
-    json.dump(db, f)
-    f.close()
+        self.m.acquire()
+
+        Mutex.user_lock.release()
+
+    def __del__(self):
+        """Release lock upon destruction of the object"""
+        if self.m.locked():
+            self.m.release()
+
+    def unlock(self):
+        """Unlock the underlying lock; shouldn't be used"""
+        self.m.release()
+
+class User:
+    def __init__(self, user_id) -> None:
+        lock = Mutex(user_id)
+
+        # Unique user id defined by Telegram
+        self.id = user_id
+
+        # Assume an existing user
+        self._first_time_user = False
+
+        # Attempt to retrieve user data from the database
+        user_state = self._retrieve_user()
+
+        # Check whether this user exists
+        if user_state is None:
+            # Initialize new user's state
+            user_state = {
+                "balance": 0,
+                "tickets": [],
+                "last_active": firestore.SERVER_TIMESTAMP
+            }
+
+            self._first_time_user = True
+
+            # Upload state to the database
+            doc_ref = self._doc_ref()
+            doc_ref.set(user_state)
+
+        self.state = user_state
+
+    def _retrieve_user(self):
+        """
+        Returns user data from the database if the user exists, None otherwise
+        Updates the timestamp when the user was last active
+        Assumes a lock is held to protect user data
+        """
+        # Retrieve user data
+        doc_ref = self._doc_ref()
+        user = doc_ref.get()
+
+        if user.exists:
+            doc_ref.update({"last_active": firestore.SERVER_TIMESTAMP})
+
+        return user.to_dict()
+
+    def _to_dict(self):
+        return deepcopy(self.state)
+
+    def _doc_ref(self):
+        """Returns Firestore document reference to this user's db file"""
+        return db.collection("users").document(str(self.id))
+
+    def is_first_time_user(self):
+        """Return True if the user is not registered with the bot"""
+        lock = Mutex(self.id)
+        return self._first_time_user
+
+    def add_balance(self, amount) -> float:
+        """
+        Adds <amount> to the balance
+        ### Returns:
+        New balance: float
+        """
+        lock = Mutex(self.id)
+        doc_ref = self._doc_ref()
+
+        new_balance = self.state["balance"] + amount
+
+        doc_ref.update({"balance": new_balance})
+
+        return new_balance
+
+    def withdraw_balance(self, amount) -> Tuple[bool, float]:
+        """
+        Withdraw <amount> to the balance
+        ### Returns:
+        (Success: bool, New balance: float)
+        """
+        lock = Mutex(self.id)
+        doc_ref = self._doc_ref()
+
+        cur_balance = self.state["balance"]
+        if cur_balance - amount < 0:
+            return False, None
+
+        new_balance = cur_balance - amount
+
+        doc_ref.update({"balance": new_balance})
+
+        return True, new_balance

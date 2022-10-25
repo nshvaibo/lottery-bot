@@ -2,7 +2,7 @@
 import telebot
 
 import config
-import user
+from user import User
 
 bot = telebot.TeleBot(config.API_TOKEN, parse_mode=None) # You can set parse_mode by default. HTML or MARKDOWN
 
@@ -10,9 +10,12 @@ bot = telebot.TeleBot(config.API_TOKEN, parse_mode=None) # You can set parse_mod
 def command_start(message):
     chat_id = message.chat.id
     user_id = message.from_user.id
+    
+    # Retrieve user data from database
+    user = User(user_id)
+
     # If user hasn't used the "/start" command yet:
-    if not user.is_known(user_id):
-        user.add_user(user_id) 
+    if user.is_first_time_user():
         bot.send_message(chat_id, f"Добро пожаловать, {message.from_user.first_name}")
     else:
         bot.send_message(chat_id, "Мы уже знакомы, рад вновь тебя видеть!")

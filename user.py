@@ -1,7 +1,6 @@
 """Manipulation of client data: wallet, lottery tickets"""
 from copy import deepcopy
 from threading import Lock
-from typing import Tuple
 from weakref import WeakValueDictionary
 
 from db import db, firestore
@@ -55,7 +54,7 @@ class User:
         if user_state is None:
             # Initialize new user's state
             user_state = {
-                "balance": 0,
+                "balance": float(0),
                 "tickets": [],
                 "last_active": firestore.SERVER_TIMESTAMP
             }
@@ -95,6 +94,13 @@ class User:
         lock = Mutex(self.id)
         return self._first_time_user
 
+    def get_balance(self) -> float:
+        """Returns current user balance"""
+        lock = Mutex(self.id)
+        
+        return self.state["balance"]
+
+    
     def add_balance(self, amount) -> float:
         """
         Adds <amount> to the balance
@@ -106,11 +112,13 @@ class User:
 
         new_balance = self.state["balance"] + amount
 
+        # Update balance in the database
         doc_ref.update({"balance": new_balance})
 
-        return new_balance
+        # Update balance locally
+        self.state["balance"] = new_balance
 
-    def withdraw_balance(self, amount) -> Tuple[bool, float]:
+    def withdraw_balance(self, amount) -> bool:
         """
         Withdraw <amount> to the balance
         ### Returns:
@@ -119,12 +127,17 @@ class User:
         lock = Mutex(self.id)
         doc_ref = self._doc_ref()
 
+        # Can only withdraw at most how much is on the balance
         cur_balance = self.state["balance"]
         if cur_balance - amount < 0:
-            return False, None
+            return False
 
         new_balance = cur_balance - amount
 
+        # Update balance in the database
         doc_ref.update({"balance": new_balance})
 
-        return True, new_balance
+        # Update balance locally
+        self.state["balance"] = new_balance
+
+        return True

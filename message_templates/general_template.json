@@ -1,0 +1,19 @@
+{
+    "general_messages": {
+        "welcome_message": "Welcome, {name}!",
+        "already_registered": "You are already a user, good to see you again!",
+        "unknown_message": "Sorry, I didn't understand that.\nPlease take a look at /help"
+    },
+
+    "account_operations": {
+        "balance_status": "Current balance: {balance:.2f} TON.",
+        "deposit_button": "Deposit",
+        "withdraw_button": "Withdraw",
+        "enter_amount_prompt": "Enter the amount",
+        "deposit_prompt": "How much would you like to deposit?",
+        "withdraw_prompt": "How much would you like to withdraw?",
+        "overdraft_attempt": "Very clever, but please try again...",
+        "incorrect_format": "Please enter the amount in the correct format."
+    }
+
+}

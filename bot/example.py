@@ -1,18 +1,13 @@
-"""Initialization of the bot"""
-import json
-
+"""Examples of different bot use cases"""
+import config
 import telebot
-from requests import delete
 from telebot.callback_data import CallbackData, CallbackDataFilter
 from telebot.custom_filters import StateFilter
 from telebot.handler_backends import State, StatesGroup
 from telebot.storage import StateMemoryStorage
-
-import config
 from user import User
 
-with open("message_templates/general_template.json") as f:
-    message_templates = json.load(f)
+message_templates = config.message_templates
 
 state_storage = StateMemoryStorage()
 bot = telebot.TeleBot(

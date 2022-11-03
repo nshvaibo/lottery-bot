@@ -1,4 +1,4 @@
-"""Examples of different bot use cases"""
+"""Examples of different bot use cases; must not be used by the application"""
 import config
 import telebot
 from telebot.callback_data import CallbackData, CallbackDataFilter
@@ -7,7 +7,7 @@ from telebot.handler_backends import State, StatesGroup
 from telebot.storage import StateMemoryStorage
 from user import User
 
-message_templates = config.message_templates
+message_templates = {}
 
 state_storage = StateMemoryStorage()
 bot = telebot.TeleBot(
@@ -26,9 +26,9 @@ class MyStates(StatesGroup):
     withdrawing_balance = State()
 
 balance_factory = CallbackData("operation", prefix="balance")
-def balance_interface():
-    deposit_button = message_templates["account_operations"]["deposit_button"]
-    withdraw_button = message_templates["account_operations"]["withdraw_button"]
+def balance_interface(lang):
+    deposit_button = message_templates[lang]["account_operations"]["deposit_button"]
+    withdraw_button = message_templates[lang]["account_operations"]["withdraw_button"]
     keyboard=[[
         telebot.types.InlineKeyboardButton(
             text=deposit_button,
@@ -48,29 +48,31 @@ def command_start(message):
     
     # Retrieve user data from database
     user = User(user_id)
+    lang = message.from_user.language_code
 
     # If user hasn't used the "/start" command yet:
     if user.is_first_time_user():
-        welcome_msg = message_templates["general_messages"]["welcome_message"].format(name = message.from_user.first_name)
+        welcome_msg = message_templates[lang]["general_messages"]["welcome_message"].format(name = message.from_user.first_name)
         bot.send_message(chat_id, welcome_msg)
     else:
-        known_user_msg = message_templates["general_messages"]["already_registered"]
+        known_user_msg = message_templates[lang]["general_messages"]["already_registered"]
         bot.send_message(chat_id, known_user_msg)
 
-    current_balance_msg = message_templates["account_operations"]["balance_status"].format(balance = user.get_balance())
-    bot.send_message(chat_id, current_balance_msg, reply_markup=balance_interface())
+    current_balance_msg = message_templates[lang]["account_operations"]["balance_status"].format(balance = user.get_balance())
+    bot.send_message(chat_id, current_balance_msg, reply_markup=balance_interface(lang))
 
 @bot.callback_query_handler(func=balance_factory.filter().check)
 def products_callback(call: telebot.types.CallbackQuery):
     callback_data: dict = balance_factory.parse(callback_data=call.data)
+    lang = call.message.from_user.language_code
     if callback_data["operation"] == "add":
-        new_text = message_templates["account_operations"]["deposit_prompt"]
+        new_text = message_templates[lang]["account_operations"]["deposit_prompt"]
         bot.set_state(call.message.chat.id, MyStates.adding_balance, call.message.chat.id)
     else:
-        new_text = message_templates["account_operations"]["withdraw_prompt"]
+        new_text = message_templates[lang]["account_operations"]["withdraw_prompt"]
         bot.set_state(call.message.chat.id, MyStates.withdrawing_balance, call.message.chat.id)
     
-    placeholder_msg = message_templates["account_operations"]["enter_amount_prompt"]
+    placeholder_msg = message_templates[lang]["account_operations"]["enter_amount_prompt"]
     bot.send_message(
         chat_id=call.message.chat.id,
         text=new_text,
@@ -82,12 +84,13 @@ def products_callback(call: telebot.types.CallbackQuery):
 def adding_balance(message):
     chat_id = message.chat.id
     user_id = message.from_user.id
+    lang = message.from_user.language_code
 
     # Check that the message actually only contains amount
     try:
         amount = float(message.text)
     except ValueError as err:
-        bad_format_msg = message_templates["account_operations"]["incorrect_format"]
+        bad_format_msg = message_templates[lang]["account_operations"]["incorrect_format"]
         bot.send_message(chat_id, bad_format_msg)
         return
     
@@ -100,19 +103,20 @@ def adding_balance(message):
     # Change state back to normal
     bot.delete_state(user_id, chat_id)
 
-    current_balance_msg = message_templates["account_operations"]["balance_status"].format(balance = user.get_balance())
-    bot.send_message(chat_id, current_balance_msg, reply_markup=balance_interface())
+    current_balance_msg = message_templates[lang]["account_operations"]["balance_status"].format(balance = user.get_balance())
+    bot.send_message(chat_id, current_balance_msg, reply_markup=balance_interface(lang))
 
 @bot.message_handler(state=MyStates.withdrawing_balance)
-def adding_balance(message):
+def withdrawing_balance(message):
     chat_id = message.chat.id
     user_id = message.from_user.id
+    lang = message.from_user.language_code
 
     # Check that the message actually only contains amount
     try:
         amount = float(message.text)
     except ValueError as err:
-        bad_format_msg = message_templates["account_operations"]["incorrect_format"]
+        bad_format_msg = message_templates[lang]["account_operations"]["incorrect_format"]
         bot.send_message(chat_id, bad_format_msg)
         return
     
@@ -121,19 +125,20 @@ def adding_balance(message):
 
     # Update database and local state with new balance
     if not user.withdraw_balance(amount):
-        overdraft_msg = message_templates["account_operations"]["overdraft_attempt"]
+        overdraft_msg = message_templates[lang]["account_operations"]["overdraft_attempt"]
         bot.send_message(chat_id, overdraft_msg)
         return
 
     # Change state back to normal
     bot.delete_state(user_id, chat_id)
 
-    current_balance_msg = message_templates["account_operations"]["balance_status"].format(balance = user.get_balance())
-    bot.send_message(chat_id, current_balance_msg, reply_markup=balance_interface())
+    current_balance_msg = message_templates[lang]["account_operations"]["balance_status"].format(balance = user.get_balance())
+    bot.send_message(chat_id, current_balance_msg, reply_markup=balance_interface(lang))
 
 # Default message handler: any message not expected by the bot
 @bot.message_handler(content_types=['audio', 'photo', 'voice', 'video', 'document',
     'text', 'location', 'contact', 'sticker'])
 def command_default(message):
-    unknown_msg = message_templates["general_messages"]["unknown_message"]
+    lang = message.from_user.language_code
+    unknown_msg = message_templates[lang]["general_messages"]["unknown_message"]
     bot.reply_to(message, unknown_msg)

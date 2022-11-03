@@ -13,7 +13,7 @@
         "deposit_prompt": "How much would you like to deposit?",
         "withdraw_prompt": "How much would you like to withdraw?",
         "overdraft_attempt": "Very clever, but please try again...",
-        "incorrect_format": "Please enter the amount in the correct format."
+        "incorrect_format": "Please enter a valid number."
     }
 
 }

@@ -38,7 +38,7 @@ class Mutex:
         self.m.release()
 
 class User:
-    def __init__(self, user_id) -> None:
+    def __init__(self, user_id: int) -> None:
         lock = Mutex(user_id)
 
         # Unique user id defined by Telegram
@@ -52,10 +52,11 @@ class User:
 
         # Check whether this user exists
         if user_state is None:
-            # Initialize new user's state
+            # Initialize new user's state to default values
             user_state = {
                 "balance": float(0),
                 "tickets": [],
+                # "lang": lang,
                 "last_active": firestore.SERVER_TIMESTAMP
             }
 
@@ -101,7 +102,7 @@ class User:
         return self.state["balance"]
 
     
-    def add_balance(self, amount) -> float:
+    def add_balance(self, amount):
         """
         Adds <amount> to the balance
         ### Returns:
@@ -141,3 +142,28 @@ class User:
         self.state["balance"] = new_balance
 
         return True
+
+    # def get_language(self) -> str:
+    #     """
+    #     Returns user language. Possible values:
+    #     * en
+    #     * ru
+    #     """
+    #     lock = Mutex(self.id)
+        
+    #     return self.state["lang"]
+
+    # def set_language(self, lang: str) -> str:
+    #     """
+    #     Updates the value of user language in the database
+    #     :param lang: Language of the user. Possible values: <"en", "ru">
+    #     :type lang: str
+    #     """
+    #     lock = Mutex(self.id)
+    #     doc_ref = self._doc_ref()
+
+    #     # Update balance in the database
+    #     doc_ref.update({"lang": lang})
+
+    #     # Update balance locally
+    #     self.state["lang"] = lang

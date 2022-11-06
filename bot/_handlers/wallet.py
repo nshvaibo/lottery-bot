@@ -1,6 +1,7 @@
 import telebot
 from bot._bot_init import bot
 from bot._message_templates import message_templates
+from bot._handlers.menu_interface import back_to_menu
 from telebot.callback_data import CallbackData
 from telebot.handler_backends import State, StatesGroup
 from user import User
@@ -16,6 +17,7 @@ balance_factory = CallbackData("operation", prefix="balance")
 def balance_interface(lang: str):
     deposit_button = message_templates[lang]["account_operations"]["deposit_button"]
     withdraw_button = message_templates[lang]["account_operations"]["withdraw_button"]
+    tomenu_button = message_templates[lang]["menu"]["back_to_menu_button"]
     keyboard=[[
         telebot.types.InlineKeyboardButton(
             text=deposit_button,
@@ -26,25 +28,40 @@ def balance_interface(lang: str):
             callback_data=balance_factory.new(operation="withdraw")
         )
     ]]
-    return telebot.types.InlineKeyboardMarkup(keyboard=keyboard, row_width=2)
+    
+    markup = telebot.types.InlineKeyboardMarkup(keyboard=keyboard, row_width=2)
+    tomenu_button = telebot.types.InlineKeyboardButton(
+        text=tomenu_button,
+        callback_data=balance_factory.new(operation="back_to_menu")
+    )
+    markup.add(tomenu_button, row_width=1)
+    
+    return markup
 
 @bot.callback_query_handler(func=balance_factory.filter().check)
 def balance_change_callback(call: telebot.types.CallbackQuery):
     callback_data: dict = balance_factory.parse(callback_data=call.data)
+    chat_id = call.message.chat.id
+    user_id = call.message.chat.id
+    message_id = call.message.id
     lang = call.from_user.language_code
+    
+    enter_amount_msg = message_templates[lang]["account_operations"]["enter_amount_prompt"]
     if callback_data["operation"] == "add":
         new_text = message_templates[lang]["account_operations"]["deposit_prompt"]
         bot.set_state(call.message.chat.id, States.adding_balance, call.message.chat.id)
-    else:
+        bot.edit_message_text(new_text, chat_id, message_id, reply_markup=None)
+    elif callback_data["operation"] == "withdraw":
         new_text = message_templates[lang]["account_operations"]["withdraw_prompt"]
         bot.set_state(call.message.chat.id, States.withdrawing_balance, call.message.chat.id)
-    
-    placeholder_msg = message_templates[lang]["account_operations"]["enter_amount_prompt"]
-    bot.send_message(
-        chat_id=call.message.chat.id,
-        text=new_text,
-        reply_markup=telebot.types.ForceReply(input_field_placeholder=placeholder_msg)
-    )
+        bot.edit_message_text(new_text, chat_id, message_id, reply_markup=None)
+    elif callback_data["operation"] == "back_to_menu":
+        # Discard all current operations in progress
+        bot.delete_state(user_id, chat_id)
+        
+        # Go back to main menu
+        back_to_menu(bot, call.message, lang)
+
 
 # Balance operations handlers
 @bot.message_handler(state=States.adding_balance)

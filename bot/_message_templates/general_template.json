@@ -5,6 +5,13 @@
         "unknown_message": "Sorry, I didn't understand that.\nPlease take a look at /help"
     },
 
+    "menu": {
+        "menu_message": "Main menu",
+        "tickets_button": "Tickets",
+        "wallet_button": "Wallet",
+        "back_to_menu_button": "Back to main menu"
+    },
+
     "account_operations": {
         "balance_status": "Current balance: {balance:.2f} TON.",
         "deposit_button": "Deposit",

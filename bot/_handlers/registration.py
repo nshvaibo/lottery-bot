@@ -1,6 +1,6 @@
 """Handle /start command"""
 from bot._bot_init import bot
-from bot._handlers.menu import menu_interface
+from bot._handlers.menu_interface import menu_interface
 from bot._message_templates import message_templates
 from user import User
 

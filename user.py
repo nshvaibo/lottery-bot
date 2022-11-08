@@ -4,6 +4,7 @@ from threading import Lock
 from weakref import WeakValueDictionary
 
 from db import db, firestore
+from config import TICKET_PRICE_TON
 
 
 class Mutex:
@@ -142,6 +143,33 @@ class User:
         self.state["balance"] = new_balance
 
         return True
+
+    def get_tickets(self):
+        """Returns a list of ticket numbers purchased by the user"""
+        lock = Mutex(self.id)
+    
+        return self.state["tickets"]
+
+    def purchase_ticket(self, ticket_num):
+        """Returns a list of ticket numbers purchased by the user"""
+        lock = Mutex(self.id)
+
+        # Connect to the database
+        doc_ref = self._doc_ref()
+
+        # Add new ticket and update balance in the database
+        doc_ref.update({
+            "tickets": firestore.ArrayUnion([ticket_num]),
+            "balance": self.state["balance"] - TICKET_PRICE_TON
+        })
+
+        # Update balance locally
+        self.state["balance"] -= TICKET_PRICE_TON
+
+        # Add new ticket locally
+        self.state["tickets"].append(ticket_num)
+    
+        return self.state["tickets"]
 
     # def get_language(self) -> str:
     #     """

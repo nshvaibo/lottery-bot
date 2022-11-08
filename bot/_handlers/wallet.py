@@ -74,7 +74,7 @@ def adding_balance(message):
     try:
         amount = float(message.text)
     except ValueError as err:
-        bad_format_msg = message_templates[lang]["account_operations"]["incorrect_format"]
+        bad_format_msg = message_templates[lang]["general"]["invalid_number_message"]
         bot.send_message(chat_id, bad_format_msg)
         return
     

@@ -1,7 +1,7 @@
 """State oblivious handlers (e.g. help messages, default handlers, etc.)"""
 from bot._bot_init import bot
 from bot._message_templates import message_templates
-from bot._handlers.menu import menu_interface
+from bot._handlers.menu_interface import menu_interface
 
 # Default message handler: any message not expected by the bot
 @bot.message_handler(content_types=['audio', 'photo', 'voice', 'video', 'document',

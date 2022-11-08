@@ -121,7 +121,7 @@ def buy_tickets_callback(call: telebot.types.CallbackQuery):
     message_id = call.message.id
     lang = call.from_user.language_code
     
-    enter_amount_msg = message_templates[lang]["account_operations"]["enter_amount_prompt"]
+    enter_amount_msg = message_templates[lang]["wallet"]["enter_amount_prompt"]
     if callback_data["operation"] == "buy":
         # Retrieve user data from database
         user = User(user_id)

@@ -13,14 +13,15 @@
         "back_to_menu_button": "Back to main menu"
     },
 
-    "account_operations": {
+    "wallet": {
         "balance_status": "Current balance: {balance:.2f} TON.",
         "deposit_button": "Deposit",
         "withdraw_button": "Withdraw",
         "enter_amount_prompt": "Enter the amount",
         "deposit_prompt": "How much would you like to deposit?",
         "withdraw_prompt": "How much would you like to withdraw?",
-        "overdraft_attempt": "Very clever, but please try again..."
+        "overdraft_attempt": "Very clever, but please try again...",
+        "back_button":"Back to wallet menu"
     },
 
     "tickets": {

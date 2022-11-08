@@ -27,8 +27,8 @@ class MyStates(StatesGroup):
 
 balance_factory = CallbackData("operation", prefix="balance")
 def balance_interface(lang):
-    deposit_button = message_templates[lang]["account_operations"]["deposit_button"]
-    withdraw_button = message_templates[lang]["account_operations"]["withdraw_button"]
+    deposit_button = message_templates[lang]["wallet"]["deposit_button"]
+    withdraw_button = message_templates[lang]["wallet"]["withdraw_button"]
     keyboard=[[
         telebot.types.InlineKeyboardButton(
             text=deposit_button,
@@ -58,7 +58,7 @@ def command_start(message):
         known_user_msg = message_templates[lang]["general_messages"]["already_registered"]
         bot.send_message(chat_id, known_user_msg)
 
-    current_balance_msg = message_templates[lang]["account_operations"]["balance_status"].format(balance = user.get_balance())
+    current_balance_msg = message_templates[lang]["wallet"]["balance_status"].format(balance = user.get_balance())
     bot.send_message(chat_id, current_balance_msg, reply_markup=balance_interface(lang))
 
 @bot.callback_query_handler(func=balance_factory.filter().check)
@@ -66,13 +66,13 @@ def products_callback(call: telebot.types.CallbackQuery):
     callback_data: dict = balance_factory.parse(callback_data=call.data)
     lang = call.message.from_user.language_code
     if callback_data["operation"] == "add":
-        new_text = message_templates[lang]["account_operations"]["deposit_prompt"]
+        new_text = message_templates[lang]["wallet"]["deposit_prompt"]
         bot.set_state(call.message.chat.id, MyStates.adding_balance, call.message.chat.id)
     else:
-        new_text = message_templates[lang]["account_operations"]["withdraw_prompt"]
+        new_text = message_templates[lang]["wallet"]["withdraw_prompt"]
         bot.set_state(call.message.chat.id, MyStates.withdrawing_balance, call.message.chat.id)
     
-    placeholder_msg = message_templates[lang]["account_operations"]["enter_amount_prompt"]
+    placeholder_msg = message_templates[lang]["wallet"]["enter_amount_prompt"]
     bot.send_message(
         chat_id=call.message.chat.id,
         text=new_text,
@@ -90,7 +90,7 @@ def adding_balance(message):
     try:
         amount = float(message.text)
     except ValueError as err:
-        bad_format_msg = message_templates[lang]["account_operations"]["incorrect_format"]
+        bad_format_msg = message_templates[lang]["wallet"]["incorrect_format"]
         bot.send_message(chat_id, bad_format_msg)
         return
     
@@ -103,7 +103,7 @@ def adding_balance(message):
     # Change state back to normal
     bot.delete_state(user_id, chat_id)
 
-    current_balance_msg = message_templates[lang]["account_operations"]["balance_status"].format(balance = user.get_balance())
+    current_balance_msg = message_templates[lang]["wallet"]["balance_status"].format(balance = user.get_balance())
     bot.send_message(chat_id, current_balance_msg, reply_markup=balance_interface(lang))
 
 @bot.message_handler(state=MyStates.withdrawing_balance)
@@ -116,7 +116,7 @@ def withdrawing_balance(message):
     try:
         amount = float(message.text)
     except ValueError as err:
-        bad_format_msg = message_templates[lang]["account_operations"]["incorrect_format"]
+        bad_format_msg = message_templates[lang]["wallet"]["incorrect_format"]
         bot.send_message(chat_id, bad_format_msg)
         return
     
@@ -125,14 +125,14 @@ def withdrawing_balance(message):
 
     # Update database and local state with new balance
     if not user.withdraw_balance(amount):
-        overdraft_msg = message_templates[lang]["account_operations"]["overdraft_attempt"]
+        overdraft_msg = message_templates[lang]["wallet"]["overdraft_attempt"]
         bot.send_message(chat_id, overdraft_msg)
         return
 
     # Change state back to normal
     bot.delete_state(user_id, chat_id)
 
-    current_balance_msg = message_templates[lang]["account_operations"]["balance_status"].format(balance = user.get_balance())
+    current_balance_msg = message_templates[lang]["wallet"]["balance_status"].format(balance = user.get_balance())
     bot.send_message(chat_id, current_balance_msg, reply_markup=balance_interface(lang))
 
 # Default message handler: any message not expected by the bot

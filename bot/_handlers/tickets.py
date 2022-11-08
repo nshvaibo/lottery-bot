@@ -12,9 +12,10 @@ from config import TICKET_PRICE_TON
 
 
 # States group.
-class States(StatesGroup):
+class WalletStates(StatesGroup):
     # Just name variables differently
     buying_tickets = State() # In this state user selects the number of tickets they want to buy
+    confirming_purchase = State() # Confirm requested purchase
 
 tickets_factory = CallbackData("operation", "number", prefix="tickets")
 def tickets_interface(lang: str):
@@ -130,7 +131,7 @@ def buy_tickets_callback(call: telebot.types.CallbackQuery):
         buy_prompt = buy_prompt.format(ton_price=TICKET_PRICE_TON, balance=user.get_balance())
 
         # Wait till user gets back to us with the number of tickets they want to buy
-        bot.set_state(call.message.chat.id, States.buying_tickets, call.message.chat.id)
+        bot.set_state(call.message.chat.id, WalletStates.buying_tickets, call.message.chat.id)
 
         # Change interface to selecting the number of tickets
         bot.edit_message_text(buy_prompt, chat_id, message_id, reply_markup=cart_interface(lang))
@@ -166,7 +167,7 @@ def buy_tickets_callback(call: telebot.types.CallbackQuery):
         raise RuntimeError("Unknown tickets menu option")    
         
 
-@bot.message_handler(state=States.buying_tickets)
+@bot.message_handler(state=WalletStates.buying_tickets)
 def buying_tickets(message, lang=None, num_tickets=None):
     chat_id = message.chat.id
     user_id = message.chat.id
@@ -193,13 +194,21 @@ def buying_tickets(message, lang=None, num_tickets=None):
         bot.send_message(chat_id, insufficient_funds_msg, reply_markup=back_button_interface(lang))
         return
 
+    
+    # Proceed to confirmation of purchase step
+    bot.set_state(chat_id, WalletStates.confirming_purchase, chat_id)
+
+    # Save number of tickets user wants to buy
+    # Should only confirm the same number as requested
+    bot.add_data(chat_id, chat_id, num_tickets=num_tickets)
+    
     # Ask the user to confirm purchase
     confirmation_msg = message_templates[lang]["tickets"]["confirmation_request_message"]
     confirmation_msg = confirmation_msg.format(num_tickets=num_tickets)
     bot.send_message(chat_id, confirmation_msg, reply_markup=confirmation_interface(lang, num_tickets))
     
 
-@bot.callback_query_handler(func=tickets_factory.filter(operation="confirm").check)
+@bot.callback_query_handler(func=tickets_factory.filter(operation="confirm").check, state=WalletStates.confirming_purchase)
 def confirm_purchase(call: telebot.types.CallbackQuery):
     """Confirm the purchase of the selected number of tickets"""
     callback_data: dict = tickets_factory.parse(callback_data=call.data)
@@ -208,8 +217,26 @@ def confirm_purchase(call: telebot.types.CallbackQuery):
     lang = call.from_user.language_code
     num_tickets = int(callback_data["number"])
 
+
+    with bot.retrieve_data(chat_id, chat_id) as data:
+        # Make sure we are confirming the requested purchase
+        if num_tickets != data["num_tickets"]:
+            # Delete all state, back to normal operation
+            bot.delete_state(chat_id, chat_id)
+            
+            wrong_conf_msg = message_templates[lang]["tickets"]["wrong_confirmation_message"]
+            bot.send_message(chat_id, wrong_conf_msg, reply_markup=back_button_interface(lang))
+
+
+
     # Retrieve user data from the database
     user = User(user_id)
+
+    # Make sure that the user has enough funds to purchase the desired num of tickets
+    if num_tickets * TICKET_PRICE_TON > user.get_balance():
+        insufficient_funds_msg = message_templates[lang]["tickets"]["insufficient_funds_at_confirmation_message"]
+        bot.send_message(chat_id, insufficient_funds_msg, reply_markup=back_button_interface(lang))
+        return
 
     # Update database and local state with new balance
     tickets = [] # List of purchased tickets
@@ -220,7 +247,11 @@ def confirm_purchase(call: telebot.types.CallbackQuery):
         tickets.append(ticket)
 
         # Add ticket to user profile in the database
-        user.purchase_ticket(ticket)
+        success = user.purchase_ticket(ticket)
+        if not success:
+            insufficient_funds_msg = message_templates[lang]["tickets"]["partially_insufficient_funds_message"]
+            insufficient_funds_msg = insufficient_funds_msg.format(num_tickets=len(tickets))
+            bot.send_message(chat_id, insufficient_funds_msg, reply_markup=back_button_interface(lang))
 
 
     # Format ticket message in the following way:

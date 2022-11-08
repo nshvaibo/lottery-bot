@@ -150,12 +150,16 @@ class User:
     
         return self.state["tickets"]
 
-    def purchase_ticket(self, ticket_num):
+    def purchase_ticket(self, ticket_num) -> bool:
         """Returns a list of ticket numbers purchased by the user"""
         lock = Mutex(self.id)
 
         # Connect to the database
         doc_ref = self._doc_ref()
+
+        # Make sure that the user has enough funds to purchase the ticket
+        if TICKET_PRICE_TON > self.state["balance"]:
+            return False
 
         # Add new ticket and update balance in the database
         doc_ref.update({
@@ -169,29 +173,4 @@ class User:
         # Add new ticket locally
         self.state["tickets"].append(ticket_num)
     
-        return self.state["tickets"]
-
-    # def get_language(self) -> str:
-    #     """
-    #     Returns user language. Possible values:
-    #     * en
-    #     * ru
-    #     """
-    #     lock = Mutex(self.id)
-        
-    #     return self.state["lang"]
-
-    # def set_language(self, lang: str) -> str:
-    #     """
-    #     Updates the value of user language in the database
-    #     :param lang: Language of the user. Possible values: <"en", "ru">
-    #     :type lang: str
-    #     """
-    #     lock = Mutex(self.id)
-    #     doc_ref = self._doc_ref()
-
-    #     # Update balance in the database
-    #     doc_ref.update({"lang": lang})
-
-    #     # Update balance locally
-    #     self.state["lang"] = lang
+        return True

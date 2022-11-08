@@ -28,15 +28,18 @@
         "tickets_menu_message": "Here you can view your tickets or buy new ones!",
         "my_tickets_button": "My tickets",
         "buy_tickets_button": "Buy tickets",
-        "how_many_tickets_prompt": "Here you can buy tickets with randomly generated numbers.\nEach tickets costs {ton_price} TON\nYour current balance is {balance} TON\nHow many would you like to buy?",
+        "how_many_tickets_prompt": "Here you can buy tickets with randomly generated numbers.\nEach tickets costs {ton_price} TON\nYour current balance is {balance:.2f} TON\nHow many would you like to buy?",
         "back_button": "Back to tickets menu",
         "status_message": "You current have {num_tickets} tickets with the following numbers:\n{tickets}",
         "status_no_tickets_message": "You currently don't have any tickets",
+        "partially_insufficient_funds_message": "Sorry, you only had enough funds to buy {num_tickets} ticket(s).",
+        "insufficient_funds_at_confirmation_message": "Sorry, you don't have enough funds for that!\nPlease go back and select a different number of tickets.",
         "insufficient_funds_message": "Sorry, you don't have enough funds for that!\nTry again: how many tickets would you like to buy?",
-        "successful_purchase_message": "You successfully purchased tickets with the following numbers:\n{tickets}\nYour remaining balance is {balance} TON",
+        "successful_purchase_message": "You successfully purchased tickets with the following numbers:\n{tickets}\nYour remaining balance is {balance:.2f} TON",
         "confirmation_request_message": "You are about to buy {num_tickets} ticket(s)\nPlease confirm below:",
         "confirm_button": "Confirm",
-        "discard_button": "Discard"
+        "discard_button": "Discard",
+        "wrong_confirmation_message": "You confirmed a different purchase request.\nPlease start again."
     }
 
 }

@@ -180,7 +180,7 @@ def buying_tickets(message, lang=None, num_tickets=None):
     try:
         num_tickets = int(num_tickets)
     except ValueError as err:
-        bad_format_msg = message_templates[lang]["general"]["invalid_number_message"]
+        bad_format_msg = message_templates[lang]["general_messages"]["invalid_number_message"]
         bot.send_message(chat_id, bad_format_msg)
         return
     

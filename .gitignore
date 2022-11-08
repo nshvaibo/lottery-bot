@@ -6,4 +6,4 @@ env/*
 .vscode/*
 
 # Credentials
-service_accounts/*
+security_keys/*

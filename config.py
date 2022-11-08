@@ -1,3 +1,4 @@
-API_TOKEN = "5692565191:AAEqrH7XKbao8WI9f5xa1QguxltjlM_-n3E"
-GOOGLE_APPLICATION_CREDENTIALS = "/home/nshvaibo/lottery_bot/service_accounts/lottery-bot-366521-47477b6ca775.json"
+from security_keys.api_key import API_TOKEN
+
+GOOGLE_APPLICATION_CREDENTIALS = "/home/nshvaibo/lottery_bot/security_keys/lottery-bot-366521-47477b6ca775.json"
 TICKET_PRICE_TON = 1 # Price of the ticket in TON

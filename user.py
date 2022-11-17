@@ -3,12 +3,13 @@ from copy import deepcopy
 
 from config import TICKET_PRICE_TON
 from db import db, firestore
-from mutex import Mutex
+from lock_generator import LockGenerator
 
+lock_generator = LockGenerator()
 
 class User:
     def __init__(self, user_id: int) -> None:
-        lock = Mutex(user_id)
+        lock = lock_generator.get_lock(user_id)
 
         # Unique user id defined by Telegram
         self.id = user_id
@@ -61,12 +62,12 @@ class User:
 
     def is_first_time_user(self):
         """Return True if the user is not registered with the bot"""
-        lock = Mutex(self.id)
+        lock = lock_generator.get_lock(self.id)
         return self._first_time_user
 
     def get_balance(self) -> float:
         """Returns current user balance"""
-        lock = Mutex(self.id)
+        lock = lock_generator.get_lock(self.id)
         
         return self.state["balance"]
 
@@ -77,7 +78,7 @@ class User:
         ### Returns:
         New balance: float
         """
-        lock = Mutex(self.id)
+        lock = lock_generator.get_lock(self.id)
         doc_ref = self._doc_ref()
 
         new_balance = self.state["balance"] + amount
@@ -94,7 +95,7 @@ class User:
         ### Returns:
         (Success: bool, New balance: float)
         """
-        lock = Mutex(self.id)
+        lock = lock_generator.get_lock(self.id)
         doc_ref = self._doc_ref()
 
         # Can only withdraw at most how much is on the balance
@@ -114,13 +115,13 @@ class User:
 
     def get_tickets(self):
         """Returns a list of ticket numbers purchased by the user"""
-        lock = Mutex(self.id)
+        lock = lock_generator.get_lock(self.id)
     
         return self.state["tickets"]
 
     def purchase_ticket(self, ticket_num) -> bool:
         """Returns a list of ticket numbers purchased by the user"""
-        lock = Mutex(self.id)
+        lock = lock_generator.get_lock(self.id)
 
         # Connect to the database
         doc_ref = self._doc_ref()

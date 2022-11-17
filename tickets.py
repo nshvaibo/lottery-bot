@@ -18,12 +18,12 @@ class Tickets:
     
     def get_all(self):
         """Returns a dict of (ticket_number, user_id)"""
-        lock = lock_generator.get_lock(self.lottery)
+        lock = lock_generator.get_lock(self.lottery, read_only=True)
 
         tickets_ref = self._subcollection_ref()
-        tickets = []
+        tickets = {}
         for doc in tickets_ref.stream():
-            tickets.append(doc.id)
+            tickets[doc.id] = doc.to_dict()["user_id"]
 
         return tickets
 

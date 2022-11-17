@@ -10,6 +10,7 @@ from bot._message_templates import message_templates
 from config import TICKET_PRICE_TON
 from tickets import Tickets
 from user import User
+from special_users import daily_lottery_fund, admin_balance
 
 
 # States group.
@@ -253,6 +254,12 @@ def confirm_purchase(call: telebot.types.CallbackQuery):
             insufficient_funds_msg = message_templates[lang]["tickets"]["partially_insufficient_funds_message"]
             insufficient_funds_msg = insufficient_funds_msg.format(num_tickets=len(tickets))
             bot.send_message(chat_id, insufficient_funds_msg, reply_markup=back_button_interface(lang))
+        else:
+            # 90% of the ticket price goes to prize fund
+            daily_lottery_fund.add_balance(0.9)
+
+            # 10% of the ticket price goes to administration
+            admin_balance.add_balance(0.1)
     
     # Add all purchased tickets to the draw for this lottery
     tickets_db = Tickets("daily")

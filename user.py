@@ -8,7 +8,7 @@ from lock_generator import LockGenerator
 lock_generator = LockGenerator()
 
 class User:
-    def __init__(self, user_id: int) -> None:
+    def __init__(self, user_id) -> None:
         lock = lock_generator.get_lock(user_id)
 
         # Unique user id defined by Telegram

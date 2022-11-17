@@ -1,4 +1,4 @@
-from threading import Lock
+from threading import Lock, RLock
 from weakref import WeakValueDictionary
 
 class MutexRAII:
@@ -20,7 +20,7 @@ class LockGenerator:
         # Map of IDs and their corresponding mutexes if they exist
         self.locks = WeakValueDictionary()
     
-    def get_lock(self, id):
+    def get_lock(self, id, read_only=False):
         """Returns a lock for this entity in the group when shared state can be accessed"""
         self.general_lock.acquire()
 
@@ -28,7 +28,7 @@ class LockGenerator:
         if id in self.locks:
             lock = self.locks[id]
         else: # Otherwise create a new lock
-            lock = Lock()
+            lock = Lock() if not read_only else RLock()
             self.locks[id] = lock
 
         lock.acquire()

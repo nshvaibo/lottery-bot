@@ -7,8 +7,9 @@ from telebot.handler_backends import State, StatesGroup
 from bot._bot_init import bot
 from bot._handlers.menu_interface import back_to_menu
 from bot._message_templates import message_templates
-from user import User
 from config import TICKET_PRICE_TON
+from tickets import Tickets
+from user import User
 
 
 # States group.
@@ -252,6 +253,10 @@ def confirm_purchase(call: telebot.types.CallbackQuery):
             insufficient_funds_msg = message_templates[lang]["tickets"]["partially_insufficient_funds_message"]
             insufficient_funds_msg = insufficient_funds_msg.format(num_tickets=len(tickets))
             bot.send_message(chat_id, insufficient_funds_msg, reply_markup=back_button_interface(lang))
+    
+    # Add all purchased tickets to the draw for this lottery
+    tickets_db = Tickets("daily")
+    tickets_db.add_tickets(tickets, user_id)
 
 
     # Format ticket message in the following way:

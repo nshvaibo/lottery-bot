@@ -1,14 +1,18 @@
+"""Daily lottery class"""
 from datetime import datetime, timedelta, timezone
 from threading import Thread
 from time import sleep
 
 from bot._bot_init import bot
+from tickets import Tickets
 from config import LOTTERY_TIME
 
 
-class Lottery(Thread):
+class DailyLottery(Thread):
     def __init__(self) -> None:
         Thread.__init__(self)
+        
+        self.tickets = Tickets("daily")
 
     def run(self):
         while True:
@@ -27,4 +31,16 @@ class Lottery(Thread):
     
     def _draw(self):
         bot.send_message(176854476, "draw")
-        sleep(60)
+
+        tickets = []
+        for i in range(10000):
+            tickets.append(i)
+
+        tickets = self.tickets.get_all()
+        print("a")
+        # import time
+        # start = time.time()
+        # self.tickets.add_tickets(tickets, "user")
+        # end = time.time()
+
+        # print(f"took {end - start} seconds")

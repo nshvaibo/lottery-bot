@@ -1,2 +1,2 @@
 """Submodule for conducting lottery"""
-from lottery._lottery import Lottery
+from lottery._daily_lottery import DailyLottery

@@ -1,42 +1,10 @@
 """Manipulation of client data: wallet, lottery tickets"""
 from copy import deepcopy
-from threading import Lock
-from weakref import WeakValueDictionary
 
-from db import db, firestore
 from config import TICKET_PRICE_TON
+from db import db, firestore
+from mutex import Mutex
 
-
-class Mutex:
-    """Provides an RAII mutex for each user"""
-    # Mutex for protecting locks for each individual user
-    user_lock = Lock()
-    
-    # Map of user IDs to their corresponding mutexes if they exist
-    locks = WeakValueDictionary()
-
-    def __init__(self, user_id) -> None:
-        Mutex.user_lock.acquire()
-
-        # Check if there is a lock for this user
-        if user_id in Mutex.locks:
-            self.m = Mutex.locks[user_id]
-        else: # Otherwise create a new lock
-            self.m = Lock()
-            Mutex.locks[user_id] = self.m
-
-        self.m.acquire()
-
-        Mutex.user_lock.release()
-
-    def __del__(self):
-        """Release lock upon destruction of the object"""
-        if self.m.locked():
-            self.m.release()
-
-    def unlock(self):
-        """Unlock the underlying lock; shouldn't be used"""
-        self.m.release()
 
 class User:
     def __init__(self, user_id: int) -> None:

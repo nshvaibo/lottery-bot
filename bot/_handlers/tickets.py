@@ -195,7 +195,11 @@ def buying_tickets(message, lang=None, num_tickets=None):
         insufficient_funds_msg = message_templates[lang]["tickets"]["insufficient_funds_message"]
         bot.send_message(chat_id, insufficient_funds_msg, reply_markup=back_button_interface(lang))
         return
-
+    
+    if num_tickets > 200:
+        bot.delete_state(chat_id)
+        bot.send_message(chat_id, "Многовато билетов, пока не можем столько продать за раз...")
+        return
     
     # Proceed to confirmation of purchase step
     bot.set_state(chat_id, WalletStates.confirming_purchase, chat_id)

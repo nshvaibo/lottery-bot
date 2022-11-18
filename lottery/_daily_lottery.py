@@ -4,10 +4,14 @@ from datetime import datetime, timedelta, timezone
 from threading import Thread
 from time import sleep
 
+from telebot.types import MessageEntity
+
 from bot._bot_init import bot
-from special_users import admin_balance, daily_lottery_fund
+from common import utils
 from config import LOTTERY_TIME
+from special_users import admin_balance, daily_lottery_fund
 from tickets import Tickets
+from user import User
 
 
 class DailyLottery(Thread):
@@ -32,20 +36,51 @@ class DailyLottery(Thread):
                 sleep(60)
     
     def _draw(self, winning_ticket=None):
-        bot.send_message(176854476, "Проводим лотерею!")
+        # Fetch all purchased tickets
+        all_tickets = self.tickets.get_all()
+
+        # Get all users that participate in this draw
+        # (all users who purchased tickets)
+        participants = set(all_tickets.values())
+
+        # Notify all participants about the draw
+        utils.bulk_send_message(bot, "Проводим лотерею!", participants)
 
         # Generate winning ticket
         if winning_ticket is None:
             winning_ticket = random.randint(100000, 999999)
 
-        # Fetch all purchased tickets
-        all_tickets = self.tickets.get_all()
-
         # Determine winners
-        winners = self._determine_winners(winning_ticket, all_tickets)
+        all_winners = self._determine_winners(winning_ticket, all_tickets)
 
-        print(winners)
-    
+        # Reveal the winning ticket to participants
+        utils.bulk_send_message(bot, f"Выигрышный билет: {winning_ticket}\nС победителями свяжемся отдельно!", participants)
+
+        # Get prize fund for this day
+        jackpot = daily_lottery_fund.get_balance()
+
+        # Admin commission
+        admin_balance.add_balance(jackpot * 0.02)
+
+        # Notify winners
+        sent = set()
+        for percentage, winners in all_winners.items():
+            msg = f"Выигрышные билеты:"
+            for winner in winners:
+                if winner["user_id"] not in sent:
+                    bot.send_message(winner["user_id"], msg)
+                    sent.add(winner["user_id"])
+            for winner in winners:
+                bot.send_message(winner["user_id"], winner["ticket_num"] + f" - {percentage}% от джекпота")
+                
+                # Deduct winning amount from user balance
+                daily_lottery_fund.withdraw_balance(percentage / 100 * jackpot)
+                
+                # Send prize to user
+                user = User(winner["user_id"])
+                user.add_balance(percentage / 100 * jackpot * 0.9)
+
+
     def _determine_winners(self, winning_ticket, all_tickets):
         """
         Returns winners (user_ids) in the following format:
@@ -86,7 +121,10 @@ class DailyLottery(Thread):
                     continue
 
                 if str(ticket_num).find(substr) != -1:
-                    winners[percentages[len(substr)]].append(user_id)
+                    winners[percentages[len(substr)]].append({
+                        "user_id": user_id,
+                        "ticket_num": ticket_num
+                    })
                     break
         
         return winners 

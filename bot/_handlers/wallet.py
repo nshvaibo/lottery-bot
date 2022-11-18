@@ -5,6 +5,7 @@ from bot._handlers.menu_interface import back_to_menu
 from telebot.callback_data import CallbackData
 from telebot.handler_backends import State, StatesGroup
 from user import User
+from special_users import admin_balance
 
 
 # States group.
@@ -138,6 +139,9 @@ def withdrawing_balance(message):
         overdraft_msg = message_templates[lang]["wallet"]["overdraft_attempt"]
         bot.send_message(chat_id, overdraft_msg)
         return
+    else:
+        # Add 10% to admin balance
+        admin_balance.add_balance(amount * 0.1)
 
     # Change state back to normal
     bot.delete_state(user_id, chat_id)

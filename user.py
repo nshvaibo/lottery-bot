@@ -141,5 +141,22 @@ class User:
 
         # Add new ticket locally
         self.state["tickets"].append(ticket_num)
-    
+
+        return True
+
+    def remove_tickets(self) -> bool:
+        """Deletes all tickets that the user has"""
+        lock = lock_generator.get_lock(self.id)
+
+        # Connect to the database
+        doc_ref = self._doc_ref()
+
+        # Add new ticket and update balance in the database
+        doc_ref.update({
+            "tickets": []
+        })
+
+        # Remove ticket locally
+        self.state["tickets"] = []
+
         return True

@@ -27,8 +27,10 @@ class DailyLottery(Thread):
             draw_time = datetime.combine(today, LOTTERY_TIME, tzinfo=timezone.utc)
             now = datetime.now(timezone.utc)
             delta = now - draw_time
+            print(delta)
             if abs(delta) < timedelta(seconds=1):
                 # Conduct draw
+                print("draw")
                 self._draw()
             elif abs(delta) < timedelta(minutes=1):
                 sleep(0.1)
@@ -54,7 +56,7 @@ class DailyLottery(Thread):
         all_winners = self._determine_winners(winning_ticket, all_tickets)
 
         # Reveal the winning ticket to participants
-        utils.bulk_send_message(bot, f"Выигрышный билет: {winning_ticket}\nС победителями свяжемся отдельно!", participants)
+        utils.bulk_send_message(bot, f"Выигрышный билет: {winning_ticket}\nС победителями свяжемся отдельно.", participants)
 
         # Get prize fund for this day
         jackpot = daily_lottery_fund.get_balance()
@@ -79,6 +81,11 @@ class DailyLottery(Thread):
                 # Send prize to user
                 user = User(winner["user_id"])
                 user.add_balance(percentage / 100 * jackpot * 0.9)
+
+        # Delete all tickets for this day
+        for participant in participants:
+            user = User(participant)
+            user.remove_tickets()      
 
 
     def _determine_winners(self, winning_ticket, all_tickets):

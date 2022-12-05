@@ -113,6 +113,37 @@ def back_button_interface(lang: str):
     
     return markup
 
+def status_interface(lang: str):
+    buy_button = message_templates[lang]["tickets"]["buy_tickets_button"]
+    back_button_msg = message_templates[lang]["tickets"]["back_button"]
+    tomenu_button_msg = message_templates[lang]["menu"]["back_to_menu_button"]
+    
+    # Create markup object
+    markup = telebot.types.InlineKeyboardMarkup()
+
+    # Add "buy tickets" button to menu
+    buy_tickets_button = telebot.types.InlineKeyboardButton(
+            text=buy_button,
+            callback_data=tickets_factory.new(operation="buy", number="-1")
+    )
+    markup.add(buy_tickets_button, row_width=1)
+
+    # Add back to tickets menu button
+    back_button = telebot.types.InlineKeyboardButton(
+        text=back_button_msg,
+        callback_data=tickets_factory.new(operation="back_to_tickets", number="-1")
+    )
+    markup.add(back_button, row_width=1)
+
+    # Add back to main menu button
+    tomenu_button = telebot.types.InlineKeyboardButton(
+        text=tomenu_button_msg,
+        callback_data=tickets_factory.new(operation="back_to_menu", number="-1")
+    )
+    markup.add(tomenu_button, row_width=1)
+    
+    return markup
+
 
 # Tickets operation handlers
 
@@ -151,7 +182,7 @@ def buy_tickets_callback(call: telebot.types.CallbackQuery):
             status_msg = status_msg.format(num_tickets=len(tickets), tickets=tickets_str)
         
         # Report status to the user
-        bot.edit_message_text(status_msg, chat_id, message_id, reply_markup=back_button_interface(lang))
+        bot.edit_message_text(status_msg, chat_id, message_id, reply_markup=status_interface(lang))
     elif callback_data["operation"] == "back_to_menu":
         # Discard all current operations in progress
         bot.delete_state(user_id, chat_id)

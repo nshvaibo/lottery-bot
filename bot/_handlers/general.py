@@ -24,10 +24,10 @@ def get_admin_status(message):
     from special_users import admin_balance, daily_lottery_fund
     from datetime import datetime, timezone
     
-    text = f"Баланс администрации: {admin_balance.get_balance()} TON\n\n"
+    text = f"Баланс администрации: {admin_balance.get_balance():.2f} TON\n\n"
 
     today = datetime.now(timezone.utc).date().strftime("%d.%m.%Y")
-    text += f"Призовой фонд на {today} составляет: {daily_lottery_fund.get_balance()} TON"
+    text += f"Призовой фонд на {today} составляет: {daily_lottery_fund.get_balance():.2f} TON"
     
     bot.reply_to(message, text)
 

@@ -20,14 +20,14 @@
     },
 
     "wallet": {
-        "balance_status": "Current balance: {balance:.2f} TON.",
-        "deposit_button": "Deposit",
-        "withdraw_button": "Withdraw",
+        "balance_status": "Ваш баланс: {balance:.2f} TON.",
+        "deposit_button": "Пополнить",
+        "withdraw_button": "Вывести",
         "enter_amount_prompt": "Enter the amount",
         "deposit_prompt": "How much would you like to deposit?",
         "withdraw_prompt": "How much would you like to withdraw?",
         "overdraft_attempt": "Very clever, but please try again...",
-        "back_button":"Back to wallet menu",
+        "back_button":"Назад",
         "min_button": "Min",
         "max_button": "Max",
         "max_deposit_message": "There is no limit to your potential:)"

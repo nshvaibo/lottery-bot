@@ -3,6 +3,7 @@ import random
 from datetime import datetime, timedelta, timezone
 from threading import Thread
 from time import sleep
+import sys # TODO: remove
 
 from telebot.types import MessageEntity
 
@@ -27,7 +28,11 @@ class DailyLottery(Thread):
             draw_time = datetime.combine(today, LOTTERY_TIME, tzinfo=timezone.utc)
             now = datetime.now(timezone.utc)
             delta = now - draw_time
-            print(delta)
+            if now <= draw_time:
+                print(f"{abs(delta).seconds/3600:.2f} hours before the lottery")
+            else:
+                print(f"{abs(delta).seconds/3600:.2f} hours after the lottery")
+
             if abs(delta) < timedelta(seconds=1):
                 # Conduct draw
                 print("draw")
@@ -36,6 +41,10 @@ class DailyLottery(Thread):
                 sleep(0.1)
             else:
                 sleep(60)
+            
+            # TODO: remove, used for debugging
+            sys.stdout.flush()
+            sys.stderr.flush()
     
     def _draw(self, winning_ticket=None):
         # Fetch all purchased tickets

@@ -22,7 +22,8 @@ class Messages:
         return self.language_templates["en"]
 
 language_files = {
-    "en": "bot/_message_templates/general_template.json"
+    "en": "bot/_message_templates/general_template.json",
+    "ru": "bot/_message_templates/ru.json"
 }
 
 message_templates = Messages(language_files)

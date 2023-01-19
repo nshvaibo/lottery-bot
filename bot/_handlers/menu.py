@@ -3,7 +3,8 @@ import telebot
 from bot._bot_init import bot
 from bot._handlers.wallet import wallet_interface
 from bot._handlers.tickets import tickets_interface
-from bot._handlers.menu_interface import menu_factory
+from bot._handlers.menu_interface import back_to_main_menu_interface, menu_interface
+from bot._handlers.menu_interface import menu_factory, back_to_menu
 from bot._message_templates import message_templates
 from user import User
 
@@ -25,5 +26,12 @@ def menu_callback(call: telebot.types.CallbackQuery):
         balance_msg = message_templates[lang]["wallet"]["balance_status"]
         balance_msg = balance_msg.format(balance=user.get_balance())
         bot.edit_message_text(balance_msg, chat_id, message_id, reply_markup=wallet_interface(lang))
+    elif callback_data["section"] == "rules":
+        rules_msg = message_templates[lang]["rules"]["message"]
+        bot.edit_message_text(rules_msg, chat_id, message_id, reply_markup=back_to_main_menu_interface(lang))
+    elif callback_data["section"] == "referrals":
+        pass
+    elif callback_data["section"] == "back_to_menu":
+        back_to_menu(bot, call.message, lang)
     else:
         raise RuntimeError("Unknown menu option")

@@ -10,7 +10,13 @@
         "menu_message": "Main menu",
         "tickets_button": "Tickets",
         "wallet_button": "Wallet",
-        "back_to_menu_button": "Back to main menu"
+        "back_to_menu_button": "Back to main menu",
+        "rules_button": "Rules",
+        "referrals_button": "Referral programs"
+    },
+
+    "rules": {
+        "message": "Here are the rules"
     },
 
     "wallet": {

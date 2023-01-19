@@ -1,0 +1,54 @@
+{
+    "general_messages": {
+        "welcome_message": "Привет! Здесь ты можешь купить электронный билет для лотереи и выиграть настоящий Джекпот!\n\nДжекпот на сегодня:\nЭкспресс лото: {jackpot:.2f} TON / ${jackpot_usd:.2f}",
+        "already_registered": "You are already a user, good to see you again!",
+        "unknown_message": "Sorry, I didn't understand that.\nPlease take a look at /help",
+        "invalid_number_message": "Please enter a valid number."
+    },
+
+    "menu": {
+        "menu_message": "Привет! Здесь ты можешь купить электронный билет для лотереи и выиграть настоящий Джекпот!\n\nДжекпот на сегодня:\nЭкспресс лото: {jackpot:.2f} TON / ${jackpot_usd:.2f}",
+        "tickets_button": "Мои билеты",
+        "wallet_button": "Баланс",
+        "back_to_menu_button": "Назад в главное меню",
+        "rules_button": "Правила",
+        "referrals_button": "Реферальная программа"
+    },
+
+    "rules": {
+        "message": "Мы проводим два вида лотереи\n\nЭкспресс лото - розыгрыш каждые 24 часа, стоимость билета 1 TON\n\nВсе или ничего - розыгрыш раз в неделю, стоимость билета 5 TON\n\nВ каждой лотерее свой призовой фонд (Джекпот), который распределяется во время розыгрыша среди всех выигрышных билетов.\n\nЭкспресс лото - при покупке билета на нем написано 6 однозначных чисел от 0 до 9.Участник лотереи может сам выбрать числа которые будут в билете или они будут сгенерированы автоматически компьютером.Чем больше чисел на вашем билете совпало с выпавшими числами, тем больше приз.\n\nРаспределение призов:2 числа, победитель получает 3% от джекпота\n3 числа, победитель получает 5% от джекпота\n4 числа, победитель получает 15% от джекпота\n5 чисел, победитель получает 25% от джекпота\n6 чисел, победитель получает 50% от джекпота\n\nФормирование Джекпота:\nС каждого купленного билета 90% идет в призовой фонд (0.9 TON)\nВсе нераспределенные выигрыши переходят в следующий раунд розыгрыша.\n\nПримеры:\nВыигрышный билет"
+    },
+
+    "wallet": {
+        "balance_status": "Current balance: {balance:.2f} TON.",
+        "deposit_button": "Deposit",
+        "withdraw_button": "Withdraw",
+        "enter_amount_prompt": "Enter the amount",
+        "deposit_prompt": "How much would you like to deposit?",
+        "withdraw_prompt": "How much would you like to withdraw?",
+        "overdraft_attempt": "Very clever, but please try again...",
+        "back_button":"Back to wallet menu",
+        "min_button": "Min",
+        "max_button": "Max",
+        "max_deposit_message": "There is no limit to your potential:)"
+    },
+
+    "tickets": {
+        "tickets_menu_message": "Here you can view your tickets or buy new ones!",
+        "my_tickets_button": "My tickets",
+        "buy_tickets_button": "Buy tickets",
+        "how_many_tickets_prompt": "Here you can buy tickets with randomly generated numbers.\nEach tickets costs {ton_price} TON\nYour current balance is {balance:.2f} TON\nHow many would you like to buy?",
+        "back_button": "Back to tickets menu",
+        "status_message": "You current have {num_tickets} tickets with the following numbers:\n{tickets}",
+        "status_no_tickets_message": "You currently don't have any tickets",
+        "partially_insufficient_funds_message": "Sorry, you only had enough funds to buy {num_tickets} ticket(s).",
+        "insufficient_funds_at_confirmation_message": "Sorry, you don't have enough funds for that!\nPlease go back and select a different number of tickets.",
+        "insufficient_funds_message": "Sorry, you don't have enough funds for that!\nTry again: how many tickets would you like to buy?",
+        "successful_purchase_message": "You successfully purchased tickets with the following numbers:\n{tickets}\nYour remaining balance is {balance:.2f} TON",
+        "confirmation_request_message": "You are about to buy {num_tickets} ticket(s)\nPlease confirm below:",
+        "confirm_button": "Confirm",
+        "discard_button": "Discard",
+        "wrong_confirmation_message": "You confirmed a different purchase request.\nPlease start again."
+    }
+
+}

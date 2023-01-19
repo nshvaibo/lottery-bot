@@ -45,6 +45,11 @@ class DailyLottery(Thread):
             # TODO: remove, used for debugging
             sys.stdout.flush()
             sys.stderr.flush()
+
+    def __del__(self):
+        # TODO: remove, used for debugging
+        sys.stdout.flush()
+        sys.stderr.flush()
     
     def _draw(self, winning_ticket=None):
         # Fetch all purchased tickets

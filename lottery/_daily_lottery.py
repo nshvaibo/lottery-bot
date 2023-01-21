@@ -22,32 +22,40 @@ class DailyLottery(Thread):
         self.tickets = Tickets("daily")
 
     def run(self):
-        while True:
-            # Check if it's time for the draw
-            today = datetime.now(timezone.utc).date()
-            draw_time = datetime.combine(today, LOTTERY_TIME, tzinfo=timezone.utc)
-            now = datetime.now(timezone.utc)
-            delta = now - draw_time
-            if now <= draw_time:
-                print(f"{abs(delta).seconds/3600:.2f} hours before the lottery")
-            else:
-                print(f"{abs(delta).seconds/3600:.2f} hours after the lottery")
+        try:
+            while True:
+                # Check if it's time for the draw
+                today = datetime.now(timezone.utc).date()
+                draw_time = datetime.combine(today, LOTTERY_TIME, tzinfo=timezone.utc)
+                now = datetime.now(timezone.utc)
+                delta = now - draw_time
+                if now <= draw_time:
+                    print(f"{abs(delta).seconds/3600:.2f} hours before the lottery")
+                else:
+                    print(f"{abs(delta).seconds/3600:.2f} hours after the lottery")
 
-            if abs(delta) < timedelta(seconds=1):
-                # Conduct draw
-                print("draw")
-                self._draw()
-            elif abs(delta) < timedelta(minutes=1):
-                sleep(0.1)
-            else:
-                sleep(60)
-            
-            # TODO: remove, used for debugging
+                if abs(delta) < timedelta(seconds=1):
+                    # Conduct draw
+                    print("draw")
+                    self._draw()
+                elif abs(delta) < timedelta(minutes=1):
+                    sleep(0.1)
+                else:
+                    sleep(60)
+                
+                # TODO: remove, used for debugging
+                sys.stdout.flush()
+                sys.stderr.flush()
+        except Exception as err:
+            print("Bot lottery died :(")
+            print(err)
+            import sys
             sys.stdout.flush()
             sys.stderr.flush()
 
     def __del__(self):
         # TODO: remove, used for debugging
+        print("Lottey died :(")
         sys.stdout.flush()
         sys.stderr.flush()
     

@@ -24,20 +24,25 @@ class DailyLottery(Thread):
     def run(self):
         try:
             while True:
+                # Indicates whether the draw has been conducted in this lottery's timeframe
+                draw_conducted = False
+
                 # Check if it's time for the draw
                 today = datetime.now(timezone.utc).date()
                 draw_time = datetime.combine(today, LOTTERY_TIME, tzinfo=timezone.utc)
                 now = datetime.now(timezone.utc)
                 delta = now - draw_time
+
                 if now <= draw_time:
                     print(f"{abs(delta).seconds/3600:.2f} hours before the lottery")
                 else:
                     print(f"{abs(delta).seconds/3600:.2f} hours after the lottery")
 
-                if abs(delta) < timedelta(seconds=1):
+                if abs(delta) < timedelta(seconds=1) and not draw_conducted:
                     # Conduct draw
                     print("draw")
                     self._draw()
+                    draw_conducted = True
                 elif abs(delta) < timedelta(minutes=1):
                     sleep(0.1)
                 else:
@@ -49,7 +54,6 @@ class DailyLottery(Thread):
         except Exception as err:
             print("Bot lottery died :(")
             print(err)
-            import sys
             sys.stdout.flush()
             sys.stderr.flush()
 

@@ -23,14 +23,12 @@
         "balance_status": "Ваш баланс: {balance:.2f} TON.",
         "deposit_button": "Пополнить",
         "withdraw_button": "Вывести",
-        "enter_amount_prompt": "Enter the amount",
-        "deposit_prompt": "How much would you like to deposit?",
-        "withdraw_prompt": "How much would you like to withdraw?",
-        "overdraft_attempt": "Very clever, but please try again...",
+        "deposit_prompt": "Ваш баланс: {balance:.2f} TON\nВведите значение в TON, на которое хотите пополнить баланс.",
+        "withdraw_prompt": "Ваш баланс: {balance:.2f} TON.\nВведите значение в TON которое хотите вывести с кошелька.\nКомиссия при выводе средств: 10%.",
+        "overdraft_attempt": "Хорошая попытка, но попробуйте еще раз, пожалуйста...",
         "back_button":"Назад",
-        "min_button": "Min",
-        "max_button": "Max",
-        "max_deposit_message": "There is no limit to your potential:)"
+        "min_button": "Минимум",
+        "max_button": "Максимум"
     },
 
     "tickets": {

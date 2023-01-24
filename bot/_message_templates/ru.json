@@ -3,7 +3,8 @@
         "welcome_message": "Привет! Здесь ты можешь купить электронный билет для лотереи и выиграть настоящий Джекпот!\n\nДжекпот на сегодня:\nЭкспресс лото: {jackpot:.2f} TON / ${jackpot_usd:.2f}",
         "already_registered": "You are already a user, good to see you again!",
         "unknown_message": "Sorry, I didn't understand that.\nPlease take a look at /help",
-        "invalid_number_message": "Please enter a valid number."
+        "invalid_number_message": "Please enter a valid number.",
+        "enter_amount_prompt": "Enter the amount"
     },
 
     "menu": {
@@ -32,21 +33,22 @@
     },
 
     "tickets": {
-        "tickets_menu_message": "Here you can view your tickets or buy new ones!",
-        "my_tickets_button": "My tickets",
-        "buy_tickets_button": "Buy tickets",
-        "how_many_tickets_prompt": "Here you can buy tickets with randomly generated numbers.\nEach tickets costs {ton_price} TON\nYour current balance is {balance:.2f} TON\nHow many would you like to buy?",
-        "back_button": "Back to tickets menu",
-        "status_message": "You current have {num_tickets} tickets with the following numbers:\n{tickets}",
-        "status_no_tickets_message": "You currently don't have any tickets",
-        "partially_insufficient_funds_message": "Sorry, you only had enough funds to buy {num_tickets} ticket(s).",
-        "insufficient_funds_at_confirmation_message": "Sorry, you don't have enough funds for that!\nPlease go back and select a different number of tickets.",
-        "insufficient_funds_message": "Sorry, you don't have enough funds for that!\nTry again: how many tickets would you like to buy?",
-        "successful_purchase_message": "You successfully purchased tickets with the following numbers:\n{tickets}\nYour remaining balance is {balance:.2f} TON",
-        "confirmation_request_message": "You are about to buy {num_tickets} ticket(s)\nPlease confirm below:",
-        "confirm_button": "Confirm",
-        "discard_button": "Discard",
-        "wrong_confirmation_message": "You confirmed a different purchase request.\nPlease start again."
+        "tickets_menu_message": "Экспресс лото\nСтоимость билета {ton_price} TON\nРозыгрыш призов проводиться каждый день в 9:00 UTC.\n\nВаш баланс: {balance:.2f} TON\n\n{tickets}\nВ случае выйграша вам придет пуш.\n\nСколько билетов вы хотите купить?",
+        "buy_tickets_button": "Купить билеты",
+        "how_many_tickets_prompt": "Экспресс лото\nСтоимость билета {ton_price} TON\n\nСколько билетов вы хотите купить?",
+        "back_button": "Назад",
+        "tickets_menu_button": "Мои билеты",
+        "status_message": "Ваши билеты:\n{tickets}",
+        "status_no_tickets_message": "У вас пока нет билетов, но здесь вы можете их купить!",
+        "partially_insufficient_funds_message": "Извините, у вас достаточно средств только для покупки {num_tickets} билета(ов)",
+        "insufficient_funds_at_confirmation_message": "Извините, у вас недостаточно средств для покупки!\nПожалуйста вернитесь назад и выберите другое количество билетов.",
+        "insufficient_funds_message": "Извините, у вас недостаточно средств для покупки!\nПопробуйте еще раз: сколько билетов вы хотите купить?",
+        "successful_purchase_message": "Поздравляем!\nБилеты успешно приобретены.\nРозыгрыш состоится в 9:00 UTC\nВ случае выйграша вам придет пуш.",
+        "confirmation_request_message": "Вы точно хотите купить {num_tickets} билет(ов)?",
+        "confirm_button": "Да",
+        "discard_button": "Нет",
+        "wrong_confirmation_message": "Этот запрос на покупку устарел.\nПожалуйста, начните заново.",
+        "add_balance_button": "Пополнить баланс"
     }
 
 }

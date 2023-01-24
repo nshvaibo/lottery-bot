@@ -6,6 +6,7 @@ from telebot.handler_backends import State, StatesGroup
 
 from bot._bot_init import bot
 from bot._handlers.menu_interface import back_to_menu
+from bot._handlers.wallet import goto_wallet_menu
 from bot._message_templates import message_templates
 from config import TICKET_PRICE_TON
 from tickets import Tickets
@@ -21,18 +22,18 @@ class WalletStates(StatesGroup):
 
 tickets_factory = CallbackData("operation", "number", prefix="tickets")
 def tickets_interface(lang: str):
-    my_tickets_button = message_templates[lang]["tickets"]["my_tickets_button"]
+    goto_wallet_text = message_templates[lang]["tickets"]["add_balance_button"]
     buy_button = message_templates[lang]["tickets"]["buy_tickets_button"]
     tomenu_button_msg = message_templates[lang]["menu"]["back_to_menu_button"]
 
     keyboard=[[
         telebot.types.InlineKeyboardButton(
-            text=my_tickets_button,
-            callback_data=tickets_factory.new(operation="status", number="-1")
-        ),
-        telebot.types.InlineKeyboardButton(
             text=buy_button,
             callback_data=tickets_factory.new(operation="buy", number="-1")
+        ),
+        telebot.types.InlineKeyboardButton(
+            text=goto_wallet_text,
+            callback_data=tickets_factory.new(operation="goto_wallet_menu", number="-1")
         )
     ]]
     
@@ -57,12 +58,12 @@ def cart_interface(lang: str):
             callback_data=tickets_factory.new(number="1", operation="")
         ),
         telebot.types.InlineKeyboardButton(
-            text="2",
-            callback_data=tickets_factory.new(number="2", operation="")
+            text="5",
+            callback_data=tickets_factory.new(number="5", operation="")
         ),
         telebot.types.InlineKeyboardButton(
-            text="3",
-            callback_data=tickets_factory.new(number="3", operation="")
+            text="10",
+            callback_data=tickets_factory.new(number="10", operation="")
         )
     ]]
     
@@ -144,8 +145,55 @@ def status_interface(lang: str):
     
     return markup
 
+def successful_purchase_interface(lang: str):
+    totickets_button_msg = message_templates[lang]["tickets"]["tickets_menu_button"]
+    tomenu_button_msg = message_templates[lang]["menu"]["back_to_menu_button"]
+    
+    # Create markup object
+    markup = telebot.types.InlineKeyboardMarkup()
+
+    # Add back to tickets menu button
+    back_button = telebot.types.InlineKeyboardButton(
+        text=totickets_button_msg,
+        callback_data=tickets_factory.new(operation="back_to_tickets", number="-1")
+    )
+    markup.add(back_button, row_width=1)
+
+    # Add back to main menu button
+    tomenu_button = telebot.types.InlineKeyboardButton(
+        text=tomenu_button_msg,
+        callback_data=tickets_factory.new(operation="back_to_menu", number="-1")
+    )
+    markup.add(tomenu_button, row_width=1)
+    
+    return markup
 
 # Tickets operation handlers
+def goto_tickets_menu(chat_id, lang, message_id):
+    # Retrieve user data from database
+    user = User(chat_id)
+
+    # Retrieve ticket numbers that belong to this user
+    tickets = user.get_tickets()
+
+    menu_msg = message_templates[lang]["tickets"]["tickets_menu_message"]
+
+    # If no tickets
+    if len(tickets) == 0:
+        tickets_msg = message_templates[lang]["tickets"]["status_no_tickets_message"]
+    else:
+        tickets_msg = message_templates[lang]["tickets"]["status_message"]
+        tickets_str = "".join([f"\t🌟{ticket}\n" for ticket in tickets])
+        tickets_msg = tickets_msg.format(num_tickets=len(tickets), tickets=tickets_str)
+
+    menu_msg = menu_msg.format(
+        ton_price=TICKET_PRICE_TON,
+        balance=user.get_balance(),
+        tickets=tickets_msg
+    )
+    
+    # Report status to the user
+    bot.edit_message_text(menu_msg, chat_id, message_id, reply_markup=tickets_interface(lang))
 
 @bot.callback_query_handler(func=tickets_factory.filter(number="-1").check)
 def buy_tickets_callback(call: telebot.types.CallbackQuery):
@@ -154,48 +202,30 @@ def buy_tickets_callback(call: telebot.types.CallbackQuery):
     user_id = call.message.chat.id
     message_id = call.message.id
     lang = call.from_user.language_code
-    
-    enter_amount_msg = message_templates[lang]["wallet"]["enter_amount_prompt"]
+
+    enter_amount_msg = message_templates[lang]["general_messages"]["enter_amount_prompt"]
     if callback_data["operation"] == "buy":
         # Retrieve user data from database
         user = User(user_id)
-    
+
         buy_prompt = message_templates[lang]["tickets"]["how_many_tickets_prompt"]
-        buy_prompt = buy_prompt.format(ton_price=TICKET_PRICE_TON, balance=user.get_balance())
+        buy_prompt = buy_prompt.format(ton_price=TICKET_PRICE_TON)
 
         # Wait till user gets back to us with the number of tickets they want to buy
         bot.set_state(call.message.chat.id, WalletStates.buying_tickets, call.message.chat.id)
 
         # Change interface to selecting the number of tickets
         bot.edit_message_text(buy_prompt, chat_id, message_id, reply_markup=cart_interface(lang))
-    elif callback_data["operation"] == "status":
-        # Retrieve user data from database
-        user = User(user_id)
-        tickets = user.get_tickets() # Ticket numbers that belong to this user
-
-        # If no tickets
-        if len(tickets) == 0:
-            status_msg = message_templates[lang]["tickets"]["status_no_tickets_message"]
-        else:
-            status_msg = message_templates[lang]["tickets"]["status_message"]
-            tickets_str = "".join([f"\t🌟{ticket}\n" for ticket in tickets])
-            status_msg = status_msg.format(num_tickets=len(tickets), tickets=tickets_str)
-        
-        # Report status to the user
-        bot.edit_message_text(status_msg, chat_id, message_id, reply_markup=status_interface(lang))
+    elif callback_data["operation"] == "goto_wallet_menu":
+        goto_wallet_menu(chat_id, lang, message_id)
     elif callback_data["operation"] == "back_to_menu":
         # Discard all current operations in progress
         bot.delete_state(user_id, chat_id)
-        
+
         # Go back to main menu
         back_to_menu(bot, call.message, lang)
     elif callback_data["operation"] == "back_to_tickets":
-        # Discard all current operations in progress
-        bot.delete_state(user_id, chat_id)
-        
-        tickets_menu_msg = message_templates[lang]["tickets"]["tickets_menu_message"]
-        # Go back to home page of tickets menu
-        bot.edit_message_text(tickets_menu_msg, chat_id, message_id, reply_markup=tickets_interface(lang))
+        goto_tickets_menu(chat_id, lang, message_id)
     else:
         raise RuntimeError("Unknown tickets menu option")    
         
@@ -307,11 +337,9 @@ def confirm_purchase(call: telebot.types.CallbackQuery):
     # "     - ticket_num2"
     # "     - ..........."
     success_msg = message_templates[lang]["tickets"]["successful_purchase_message"]
-    tickets = "".join([f"\t🌟{ticket}\n" for ticket in tickets])
-    success_msg = success_msg.format(tickets=tickets, balance=user.get_balance())
 
     # Announce ticket numbers to users
-    bot.send_message(chat_id, success_msg, reply_markup=back_button_interface(lang))
+    bot.send_message(chat_id, success_msg, reply_markup=successful_purchase_interface(lang))
 
     # Delete all state, back to normal operation
     bot.delete_state(user_id, chat_id)

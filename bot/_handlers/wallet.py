@@ -109,6 +109,13 @@ def back_to_wallet(user, user_id, chat_id, message_id, lang):
     balance_msg = balance_msg.format(balance=user.get_balance())
     bot.edit_message_text(balance_msg, chat_id, message_id, reply_markup=wallet_interface(lang))
 
+# Alias of the Helper function above with different arguments
+# Sends the user back to wallet menu.
+def goto_wallet_menu(chat_id, lang, message_id):
+    # Get user data from database
+    user = User(chat_id)
+    back_to_wallet(user, chat_id, chat_id, message_id, lang)
+
 @bot.callback_query_handler(func=balance_factory.filter().check, state=States.adding_balance)
 def deposit_callback(call: telebot.types.CallbackQuery):
     """Input min/max for deposit operation"""

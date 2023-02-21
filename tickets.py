@@ -1,8 +1,9 @@
 """Operations on user tickets"""
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, timedelta
 
 from db import db, firestore
 from lock_generator import LockGenerator
+from config import LOTTERY_TIME
 
 lock_generator = LockGenerator()
 
@@ -11,16 +12,27 @@ class Tickets:
         """<lottery> can be either \"daily\" or \"weekly\""""
         self.lottery = lottery
 
-    def _subcollection_ref(self):
+    def _subcollection_ref(self, force_today=False):
         """Returns Firestore reference to the subcollection of tickets corresponding to today's lottery"""
-        today = datetime.now(timezone.utc).date().strftime("%d.%m.%Y")
-        return db.collection(f"tickets_{self.lottery}").document(today).collection("tickets")
+        now = datetime.now(timezone.utc)
+        draw_time = datetime.combine(now, LOTTERY_TIME, tzinfo=timezone.utc)
+
+        if now > draw_time:
+            day = now + timedelta(days=1)
+        else:
+            day = now
+
+        if force_today:
+            day = now
+        
+        day = now.date().strftime("%d.%m.%Y")
+        return db.collection(f"tickets_{self.lottery}").document(day).collection("tickets")
     
     def get_all(self):
         """Returns a dict of (ticket_number, user_id)"""
         lock = lock_generator.get_lock(self.lottery, read_only=True)
 
-        tickets_ref = self._subcollection_ref()
+        tickets_ref = self._subcollection_ref(force_today=True)
         tickets = {}
         for doc in tickets_ref.stream():
             tickets[doc.id] = doc.to_dict()["user_id"]

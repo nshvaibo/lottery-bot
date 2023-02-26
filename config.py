@@ -8,3 +8,6 @@ TICKET_PRICE_TON = 1 # Price of the ticket in TON
 # UTC time of the daily lottery
 # Right now set to 12:00 Moscow time (noon)
 LOTTERY_TIME = time(hour=9, minute=0, tzinfo=timezone.utc)
+
+# Base for referrals link generation
+REF_LINK_BASE = "http://t.me/mAUoyMqbCvPYGbTx_bot"

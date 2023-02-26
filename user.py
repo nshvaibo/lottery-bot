@@ -1,7 +1,8 @@
 """Manipulation of client data: wallet, lottery tickets"""
 from copy import deepcopy
+import hashlib
 
-from config import TICKET_PRICE_TON
+from config import TICKET_PRICE_TON, REF_LINK_BASE
 from db import db, firestore
 from lock_generator import LockGenerator
 
@@ -26,6 +27,7 @@ class User:
             user_state = {
                 "balance": float(0),
                 "tickets": [],
+                "ref_link": self._generate_ref_link(user_id),
                 # "lang": lang,
                 "last_active": firestore.SERVER_TIMESTAMP
             }
@@ -36,6 +38,12 @@ class User:
             doc_ref = self._doc_ref()
             doc_ref.set(user_state)
 
+        if "ref_link" not in user_state:
+            user_state["ref_link"] = self._generate_ref_link(user_id)
+            # Upload state to the database
+            doc_ref = self._doc_ref()
+            doc_ref.update({"ref_link": user_state["ref_link"]})
+        
         self.state = user_state
 
     def _retrieve_user(self):
@@ -59,6 +67,18 @@ class User:
     def _doc_ref(self):
         """Returns Firestore document reference to this user's db file"""
         return db.collection("users").document(str(self.id))
+    
+    def _generate_ref_link(self, user_id):
+        """Generates a unique referral link for this user"""
+        # Hash Telegram user ID
+        hash_obj = hashlib.new("md5")
+        hash_obj.update(str(user_id).encode('utf-8'))
+        id_hash = hash_obj.hexdigest()
+        
+        # Combine bot invite link with this user's unique referral code
+        ref_link = REF_LINK_BASE + f"?start={id_hash}"
+
+        return ref_link
 
     def is_first_time_user(self):
         """Return True if the user is not registered with the bot"""
@@ -160,3 +180,7 @@ class User:
         self.state["tickets"] = []
 
         return True
+    
+    def get_ref_link(self) -> str:
+        """Returns the referral link this user can use to invite others"""
+        return self.state["ref_link"]

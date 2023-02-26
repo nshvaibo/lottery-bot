@@ -49,6 +49,10 @@
         "discard_button": "Нет",
         "wrong_confirmation_message": "Этот запрос на покупку устарел.\nПожалуйста, начните заново.",
         "add_balance_button": "Пополнить баланс"
+    },
+
+    "referrals": {
+        "referrals_menu_message": "Use this link to invite your friends:\n\n{ref_link}\n\nWhen the person you invited makes their first purchase both of you will get a free ticket!"
     }
 
 }

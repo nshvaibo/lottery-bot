@@ -52,7 +52,8 @@
     },
 
     "referrals": {
-        "referrals_menu_message": "Use this link to invite your friends:\n\n{ref_link}\n\nWhen the person you invited makes their first purchase both of you will get a free ticket!"
+        "referrals_menu_message": "Use this link to invite your friends:\n\n{ref_link}\n\nWhen the person you invited makes their first purchase both of you will get a free ticket!",
+        "incorrect_refcode_message": "Sorry, the referral link you used was incorrect"
     }
 
 }

@@ -5,6 +5,7 @@ import hashlib
 from config import TICKET_PRICE_TON, REF_LINK_BASE
 from db import db, firestore
 from lock_generator import LockGenerator
+from referrals import Referrals
 
 lock_generator = LockGenerator()
 
@@ -77,6 +78,10 @@ class User:
         
         # Combine bot invite link with this user's unique referral code
         ref_link = REF_LINK_BASE + f"?start={id_hash}"
+
+        # Associate referral code with the user
+        refs = Referrals()
+        refs.add_referral(id_hash, user_id)
 
         return ref_link
 
@@ -183,4 +188,15 @@ class User:
     
     def get_ref_link(self) -> str:
         """Returns the referral link this user can use to invite others"""
+        lock = lock_generator.get_lock(self.id, read_only=True)
+
         return self.state["ref_link"]
+
+    def add_referral(self, referral_id):
+        """Saves the referral code of the user, who invited this user"""
+        lock = lock_generator.get_lock(self.id)
+
+        # Connect to the database
+        doc_ref = self._doc_ref()
+
+        doc_ref.update({"invited_by": referral_id})

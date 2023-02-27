@@ -10,4 +10,5 @@ TICKET_PRICE_TON = 1 # Price of the ticket in TON
 LOTTERY_TIME = time(hour=9, minute=0, tzinfo=timezone.utc)
 
 # Base for referrals link generation
-REF_LINK_BASE = "http://t.me/mAUoyMqbCvPYGbTx_bot"
+# REF_LINK_BASE = "http://t.me/mAUoyMqbCvPYGbTx_bot"    # Lottery bot
+REF_LINK_BASE = "http://t.me/n3GL24rd8eKE_bot"          # Development bot

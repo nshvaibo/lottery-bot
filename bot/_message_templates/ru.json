@@ -52,7 +52,8 @@
     },
 
     "referrals": {
-        "referrals_menu_message": "Use this link to invite your friends:\n\n{ref_link}\n\nWhen the person you invited makes their first purchase both of you will get a free ticket!"
+        "referrals_menu_message": "Ваш реферальная ссылка:\n\n{ref_link}\n\nПриглашайте новых пользователей в лотерею и получайте бесплатные билеты вместе с друзьями!\n\nЗа каждого нового приглашенного друга получайте однин бесплатный билет. Приглашенный пользователь должен ввести ваш реферальный код и купить билет. Вы получите один бесплатный билет, а он получит 1 бонусный билет к первой покупке.\n\nПри выполнении всех условий вам придет пуш о получении бесплатного билета. Бесплатный билет будет на ближайший розыгрыш Экспресс лото.",
+        "incorrect_refcode_message": "Sorry, the referral link you used was incorrect."
     }
 
 }

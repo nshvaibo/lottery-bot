@@ -30,6 +30,11 @@ def command_start(message):
                 bot.send_message(chat_id, incorrect_ref_msg, reply_markup=menu_interface(lang))
             else:
                 user.add_referral(referral_id)
+                
+                # Notify the user who invited this user
+                joined_msg = message_templates[lang]["referrals"]["invitee_joined_message"]
+                bot.send_message(chat_id, joined_msg, reply_markup=menu_interface(lang))
+
         bot.send_message(chat_id, welcome_msg, reply_markup=menu_interface(lang))
     else:
         known_user_msg = message_templates[lang]["general_messages"]["already_registered"]

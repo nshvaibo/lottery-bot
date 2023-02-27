@@ -54,7 +54,9 @@
 
     "referrals": {
         "referrals_menu_message": "Use this link to invite your friends:\n\n{ref_link}\n\nWhen the person you invited makes their first purchase both of you will get a free ticket!",
-        "incorrect_refcode_message": "Sorry, the referral link you used was incorrect"
+        "incorrect_refcode_message": "Sorry, the referral link you used was incorrect",
+        "invitee_joined_message": "Someone joined the bot using you referral link! Once they purchase a ticket, both of you will receive an additional ticket!",
+        "invitee_purchased_message": "Congratulations! Someone, who used you referral link made a purchase. We just added an additional ticket to your account!"
     }
 
 }

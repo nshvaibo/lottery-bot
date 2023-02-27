@@ -3,7 +3,7 @@ from telebot.callback_data import CallbackData
 from telebot.handler_backends import State, StatesGroup
 
 from bot._bot_init import bot
-from bot._handlers.menu_interface import back_to_menu
+from bot._handlers.menu_interface import back_to_menu, menu_interface
 from bot._handlers.wallet import goto_wallet_menu
 from bot._message_templates import message_templates
 from config import TICKET_PRICE_TON
@@ -351,12 +351,21 @@ def confirm_purchase(call: telebot.types.CallbackQuery):
         # Mark this referral as rewarded
         user.invalidate_referral()
 
-        # Announce ticket numbers to users
+        # Announce ticket numbers to the user
         reward_msg = message_templates[lang]["tickets"]["referral_reward"]
         success_msg = success_msg.format(referral_reward=reward_msg)
         bot.send_message(chat_id, success_msg, reply_markup=successful_purchase_interface(lang))
+
+        # Add an additional ticket to the user who invited this user
+        user_who_invited = User(who_invited)
+        ticket = generate_random_ticket()
+        user_who_invited.add_ticket(ticket)
+        tickets_db.add_tickets([ticket], who_invited)
+        # Notify the user who invited that they got an additional ticket
+        reward_msg = message_templates[lang]["referrals"]["invitee_purchased_message"]
+        bot.send_message(who_invited, reward_msg, reply_markup=menu_interface(lang))
     else:
-        # Announce ticket numbers to users
+        # Announce ticket numbers to the user
         success_msg = success_msg.format(referral_reward="")
         bot.send_message(chat_id, success_msg, reply_markup=successful_purchase_interface(lang))
 

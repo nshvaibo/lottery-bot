@@ -1,8 +1,10 @@
 """Manipulation of client data: wallet, lottery tickets"""
-from copy import deepcopy
 import hashlib
+import random
+from copy import deepcopy
+from typing import Tuple
 
-from config import TICKET_PRICE_TON, REF_LINK_BASE
+from config import REF_LINK_BASE, TICKET_PRICE_TON
 from db import db, firestore
 from lock_generator import LockGenerator
 from referrals import Referrals
@@ -29,6 +31,7 @@ class User:
                 "balance": float(0),
                 "tickets": [],
                 "ref_link": self._generate_ref_link(user_id),
+                "invited_by": "",
                 # "lang": lang,
                 "last_active": firestore.SERVER_TIMESTAMP
             }
@@ -186,6 +189,21 @@ class User:
 
         return True
     
+    def add_ticket(self, ticket_num):
+        """Gifts user a ticket without subtracting their balance"""
+        lock = lock_generator.get_lock(self.id)
+
+        # Connect to the database
+        doc_ref = self._doc_ref()
+
+        # Add new ticket and update balance in the database
+        doc_ref.update({
+            "tickets": firestore.ArrayUnion([ticket_num])
+        })
+
+        # Add new ticket locally
+        self.state["tickets"].append(ticket_num)
+    
     def get_ref_link(self) -> str:
         """Returns the referral link this user can use to invite others"""
         lock = lock_generator.get_lock(self.id, read_only=True)
@@ -200,3 +218,32 @@ class User:
         doc_ref = self._doc_ref()
 
         doc_ref.update({"invited_by": referral_id})
+
+        self.state["invited_by"] = referral_id
+
+    def is_invited(self) -> Tuple[bool, int]:
+        """
+            Returns a tuple:
+                * The first member indicates whether there is a pending unrewarded referral
+                * The second member is valid only if the first is True
+                * The second member is the user id of the user, who invited the current user
+        """
+        lock = lock_generator.get_lock(self.id, read_only=True)
+        
+        # Check if this person was referred by someone
+        if self.state["invited_by"] != -1:
+            return True, self.state["invited_by"]
+        
+        # Otherwise, there is no unrewarded referral
+        return False, -1
+    
+    def invalidate_referral(self):
+        """Used to mark the referral as used (when the user who invited this user has been rewarded)"""
+        lock = lock_generator.get_lock(self.id)
+
+        # Connect to the database
+        doc_ref = self._doc_ref()
+
+        # Invalidate referral
+        doc_ref.update({"invited_by": -1})
+        self.state["invited_by"] = -1

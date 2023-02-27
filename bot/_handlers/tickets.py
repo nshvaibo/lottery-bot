@@ -1,5 +1,3 @@
-import random
-
 import telebot
 from telebot.callback_data import CallbackData
 from telebot.handler_backends import State, StatesGroup
@@ -12,6 +10,7 @@ from config import TICKET_PRICE_TON
 from tickets import Tickets
 from user import User
 from special_users import daily_lottery_fund, admin_balance
+from common.utils import generate_random_ticket
 
 
 # States group.
@@ -310,7 +309,7 @@ def confirm_purchase(call: telebot.types.CallbackQuery):
     for _ in range(num_tickets):
         # Generate random number
         # TODO: use better algorithm
-        ticket = random.randint(100000, 999999)
+        ticket = generate_random_ticket()
         tickets.append(ticket)
 
         # Add ticket to user profile in the database
@@ -338,8 +337,28 @@ def confirm_purchase(call: telebot.types.CallbackQuery):
     # "     - ..........."
     success_msg = message_templates[lang]["tickets"]["successful_purchase_message"]
 
-    # Announce ticket numbers to users
-    bot.send_message(chat_id, success_msg, reply_markup=successful_purchase_interface(lang))
+    is_invited, who_invited = user.is_invited()
+
+    if is_invited:
+        # Reward the user, who invited them
+        # TODO: reward
+
+        # Reward the current user
+        ticket = generate_random_ticket()
+        user.add_ticket(ticket)
+        tickets_db.add_tickets([ticket], user_id)
+
+        # Mark this referral as rewarded
+        user.invalidate_referral()
+
+        # Announce ticket numbers to users
+        reward_msg = message_templates[lang]["tickets"]["referral_reward"]
+        success_msg = success_msg.format(referral_reward=reward_msg)
+        bot.send_message(chat_id, success_msg, reply_markup=successful_purchase_interface(lang))
+    else:
+        # Announce ticket numbers to users
+        success_msg = success_msg.format(referral_reward="")
+        bot.send_message(chat_id, success_msg, reply_markup=successful_purchase_interface(lang))
 
     # Delete all state, back to normal operation
     bot.delete_state(user_id, chat_id)

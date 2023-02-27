@@ -1,5 +1,8 @@
 """Helper functions for use in all submodules"""
 
+import random
+
+
 def bulk_send_message(bot, message=None, users_ids=None, map=None):
     """
     Send <message> to each user in <user_ids> in bulk.
@@ -17,3 +20,7 @@ def bulk_send_message(bot, message=None, users_ids=None, map=None):
     
     else:
         raise RuntimeError("Incorrect use of bulk_send_message()")
+
+def generate_random_ticket() -> int:
+    """Returns the number of a randomly generated ticket"""
+    return random.randint(100000, 999999)

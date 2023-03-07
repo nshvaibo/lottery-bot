@@ -31,7 +31,7 @@ class User:
                 "balance": float(0),
                 "tickets": [],
                 "ref_link": self._generate_ref_link(user_id),
-                "invited_by": "",
+                "invited_by": -1,
                 # "lang": lang,
                 "last_active": firestore.SERVER_TIMESTAMP
             }

@@ -81,9 +81,6 @@ class DailyLottery(Thread):
         # Determine winners
         all_winners = self._determine_winners(winning_ticket, all_tickets)
 
-        # Reveal the winning ticket to participants
-        utils.bulk_send_message(bot, f"Выигрышный билет: {winning_ticket}\nС победителями свяжемся отдельно.", participants)
-
         # Get prize fund for this day
         jackpot = daily_lottery_fund.get_balance()
 
@@ -91,6 +88,29 @@ class DailyLottery(Thread):
         admin_balance.add_balance(jackpot * 0.02)
 
         # Notify winners
+        winning_amount = {}
+        sent = set()
+        for percentage, winners in all_winners.items():
+            for winner in winners:
+                # Deduct winning amount from user balance
+                daily_lottery_fund.withdraw_balance(percentage / 100 * jackpot)
+                
+                # Send prize to user
+                user = User(winner["user_id"])
+                user.add_balance(percentage / 100 * jackpot * 0.9)
+                winning_amount[winner["user_id"]] = winning_amount.get(winner["user_id"], 0) + percentage / 100 * jackpot * 0.9
+        
+        # Reveal the winning ticket to participants, who didn't win
+        utils.bulk_send_message(bot, f"🎟Проводим лотерею🎟\n🔍Проверяем билеты🔍\n🏆Определяем победителей🏆\n💸Производим выплаты 💸\n\nК сожалению, в этот раз вам не повезло, но удача улыбнется вам в следующий раз!\n\n\nЖелаем удачи!", participants - set(winning_amount.keys()))
+        
+        # Notify all winners about their winnings
+        msg = "🎟Проводим лотерею🎟\n🔍Проверяем билеты🔍\n🏆Определяем победителей🏆\n💸Производим выплаты 💸\n\n🎉Поздравляем, вы выиграли {winning_amount:.2f}TON🎉"
+        notifications = {}
+        for winner, amount in winning_amount.items():
+            notifications[winner] = msg.format(winning_amount=amount)
+        
+        utils.bulk_send_message(bot, map=notifications)
+        
         sent = set()
         for percentage, winners in all_winners.items():
             msg = f"Выигрышные билеты:"
@@ -100,13 +120,6 @@ class DailyLottery(Thread):
                     sent.add(winner["user_id"])
             for winner in winners:
                 bot.send_message(winner["user_id"], winner["ticket_num"] + f" - {percentage}% от джекпота")
-                
-                # Deduct winning amount from user balance
-                daily_lottery_fund.withdraw_balance(percentage / 100 * jackpot)
-                
-                # Send prize to user
-                user = User(winner["user_id"])
-                user.add_balance(percentage / 100 * jackpot * 0.9)
 
         # Delete all tickets for this day
         for participant in participants:

@@ -16,7 +16,7 @@ def bulk_send_message(bot, message=None, users_ids=None, map=None):
 
     elif map is not None:
         for user_id, msg in map.items():
-            bot.send_message(user_id, message)
+            bot.send_message(user_id, msg)
     
     else:
         raise RuntimeError("Incorrect use of bulk_send_message()")

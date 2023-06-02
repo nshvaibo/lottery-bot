@@ -25,10 +25,9 @@ class DailyLottery(Thread):
 
     def run(self):
         try:
+            # Indicates whether the draw has been conducted in this lottery's timeframe
+            draw_conducted = False
             while True:
-                # Indicates whether the draw has been conducted in this lottery's timeframe
-                draw_conducted = False
-
                 # Check if it's time for the draw
                 today = datetime.now(timezone.utc).date()
                 draw_time = datetime.combine(today, LOTTERY_TIME, tzinfo=timezone.utc)
@@ -48,6 +47,7 @@ class DailyLottery(Thread):
                 elif abs(delta) < timedelta(minutes=1):
                     sleep(0.1)
                 else:
+                    draw_conducted = False
                     sleep(60)
                 
                 # TODO: remove, used for debugging

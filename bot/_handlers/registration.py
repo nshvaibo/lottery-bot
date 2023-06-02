@@ -1,11 +1,15 @@
 """Handle /start command"""
+import logging
+
 from bot._bot_init import bot
 from bot._handlers.menu_interface import menu_interface
 from bot._message_templates import message_templates
 from special_users import daily_lottery_fund
 from user import User
 from referrals import Referrals
+from config import LOGGER_NAME
 
+logger = logging.getLogger(LOGGER_NAME)
 
 @bot.message_handler(commands=["start"])
 def command_start(message):
@@ -21,6 +25,7 @@ def command_start(message):
         jackpot = daily_lottery_fund.get_balance()
         welcome_msg = message_templates[lang]["general_messages"]["welcome_message"].format(jackpot=jackpot, jackpot_usd=666666)
         args = message.text.split()
+
         if len(args) == 2:
             ref_code = args[1]
             refs = Referrals()
@@ -36,6 +41,8 @@ def command_start(message):
                 bot.send_message(chat_id, joined_msg, reply_markup=menu_interface(lang))
 
         bot.send_message(chat_id, welcome_msg, reply_markup=menu_interface(lang))
+        logger.info(f"Welcomed user {user_id}")
     else:
         known_user_msg = message_templates[lang]["general_messages"]["already_registered"]
         bot.send_message(chat_id, known_user_msg, reply_markup=menu_interface(lang))
+        logger.info(f"User {user_id} attempted to register again")

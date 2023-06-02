@@ -1,12 +1,17 @@
+import logging
+
 import telebot
-from bot._bot_init import bot
-from bot._message_templates import message_templates
-from bot._handlers.menu_interface import back_to_menu
 from telebot.callback_data import CallbackData
 from telebot.handler_backends import State, StatesGroup
-from user import User
-from special_users import admin_balance
 
+from bot._bot_init import bot
+from bot._handlers.menu_interface import back_to_menu
+from bot._message_templates import message_templates
+from config import LOGGER_NAME
+from special_users import admin_balance
+from user import User
+
+logger = logging.getLogger(LOGGER_NAME)
 
 # States group.
 class States(StatesGroup):
@@ -256,6 +261,8 @@ def adding_balance(message, min=False, max=False):
     current_balance_msg = message_templates[lang]["wallet"]["balance_status"].format(balance = user.get_balance())
     bot.send_message(chat_id, current_balance_msg, reply_markup=wallet_interface(lang))
 
+    logger.info(f"User {user_id} added {amount} to their balance")
+
 @bot.message_handler(state=States.withdrawing_balance)
 def withdrawing_balance(message, min=False, max=False):
     chat_id = message.chat.id
@@ -292,3 +299,5 @@ def withdrawing_balance(message, min=False, max=False):
 
     current_balance_msg = message_templates[lang]["wallet"]["balance_status"].format(balance = user.get_balance())
     bot.send_message(chat_id, current_balance_msg, reply_markup=wallet_interface(lang))
+
+    logger.info(f"User {user_id} withdrew {amount} from their balance")

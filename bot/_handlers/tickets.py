@@ -1,3 +1,5 @@
+import logging
+
 import telebot
 from telebot.callback_data import CallbackData
 from telebot.handler_backends import State, StatesGroup
@@ -6,12 +8,13 @@ from bot._bot_init import bot
 from bot._handlers.menu_interface import back_to_menu, menu_interface
 from bot._handlers.wallet import goto_wallet_menu
 from bot._message_templates import message_templates
-from config import TICKET_PRICE_TON
+from common.utils import generate_random_ticket
+from config import LOGGER_NAME, TICKET_PRICE_TON
+from special_users import admin_balance, daily_lottery_fund
 from tickets import Tickets
 from user import User
-from special_users import daily_lottery_fund, admin_balance
-from common.utils import generate_random_ticket
 
+logger = logging.getLogger(LOGGER_NAME)
 
 # States group.
 class WalletStates(StatesGroup):
@@ -215,6 +218,7 @@ def buy_tickets_callback(call: telebot.types.CallbackQuery):
 
         # Change interface to selecting the number of tickets
         bot.edit_message_text(buy_prompt, chat_id, message_id, reply_markup=cart_interface(lang))
+        logger.info(f"User {user_id} requested to buy tickets")
     elif callback_data["operation"] == "goto_wallet_menu":
         goto_wallet_menu(chat_id, lang, message_id)
     elif callback_data["operation"] == "back_to_menu":
@@ -272,6 +276,7 @@ def buying_tickets(message, lang=None, num_tickets=None):
     confirmation_msg = message_templates[lang]["tickets"]["confirmation_request_message"]
     confirmation_msg = confirmation_msg.format(num_tickets=num_tickets)
     bot.send_message(chat_id, confirmation_msg, reply_markup=confirmation_interface(lang, num_tickets))
+    logger.info(f"User {user_id} bought {num_tickets} tickets")
     
 
 @bot.callback_query_handler(func=tickets_factory.filter(operation="confirm").check, state=WalletStates.confirming_purchase)
@@ -292,7 +297,7 @@ def confirm_purchase(call: telebot.types.CallbackQuery):
             
             wrong_conf_msg = message_templates[lang]["tickets"]["wrong_confirmation_message"]
             bot.send_message(chat_id, wrong_conf_msg, reply_markup=back_button_interface(lang))
-
+            logger.info(f"User {user_id} confirmed a different number of tickets")
 
 
     # Retrieve user data from the database
@@ -302,6 +307,7 @@ def confirm_purchase(call: telebot.types.CallbackQuery):
     if num_tickets * TICKET_PRICE_TON > user.get_balance():
         insufficient_funds_msg = message_templates[lang]["tickets"]["insufficient_funds_at_confirmation_message"]
         bot.send_message(chat_id, insufficient_funds_msg, reply_markup=back_button_interface(lang))
+        logger.info(f"User {user_id} didn't have sufficient funds for the purchase")
         return
 
     # Update database and local state with new balance
@@ -364,6 +370,8 @@ def confirm_purchase(call: telebot.types.CallbackQuery):
         # Notify the user who invited that they got an additional ticket
         reward_msg = message_templates[lang]["referrals"]["invitee_purchased_message"]
         bot.send_message(who_invited, reward_msg, reply_markup=menu_interface(lang))
+        
+        # TODO: add a log message
     else:
         # Announce ticket numbers to the user
         success_msg = success_msg.format(referral_reward="")
@@ -371,6 +379,8 @@ def confirm_purchase(call: telebot.types.CallbackQuery):
 
     # Delete all state, back to normal operation
     bot.delete_state(user_id, chat_id)
+
+    logger.info(f"User {user_id} confirmed the purchase of {num_tickets} tickets")
 
 @bot.callback_query_handler(func=tickets_factory.filter(operation="").check)
 def buy_tickets_num_callback(call: telebot.types.CallbackQuery):

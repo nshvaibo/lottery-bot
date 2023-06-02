@@ -1,19 +1,21 @@
 """Daily lottery class"""
+import logging
 import random
+import sys  # TODO: remove
 from datetime import datetime, timedelta, timezone
 from threading import Thread
 from time import sleep
-import sys # TODO: remove
 
 from telebot.types import MessageEntity
 
 from bot._bot_init import bot
 from common import utils
-from config import LOTTERY_TIME
+from config import LOTTERY_TIME, LOGGER_NAME
 from special_users import admin_balance, daily_lottery_fund
 from tickets import Tickets
 from user import User
 
+logger = logging.getLogger(LOGGER_NAME)
 
 class DailyLottery(Thread):
     def __init__(self) -> None:
@@ -34,13 +36,13 @@ class DailyLottery(Thread):
                 delta = now - draw_time
 
                 if now <= draw_time:
-                    print(f"{abs(delta).seconds/3600:.2f} hours before the lottery")
+                    logger.debug(f"{abs(delta).seconds/3600:.2f} hours before the lottery")
                 else:
-                    print(f"{abs(delta).seconds/3600:.2f} hours after the lottery")
+                    logger.debug(f"{abs(delta).seconds/3600:.2f} hours after the lottery")
 
                 if abs(delta) < timedelta(seconds=1) and not draw_conducted:
                     # Conduct draw
-                    print("draw")
+                    logger.info("Conducting draw")
                     self._draw()
                     draw_conducted = True
                 elif abs(delta) < timedelta(minutes=1):
@@ -52,14 +54,13 @@ class DailyLottery(Thread):
                 sys.stdout.flush()
                 sys.stderr.flush()
         except Exception as err:
-            print("Bot lottery died :(")
-            print(err)
+            logger.critical(f"Bot Daily Lottery died\n\nError message:\n{err}")
             sys.stdout.flush()
             sys.stderr.flush()
 
     def __del__(self):
         # TODO: remove, used for debugging
-        print("Lottey died :(")
+        logger.critical(f"Daily lotter destructor fired")
         sys.stdout.flush()
         sys.stderr.flush()
     

@@ -34,7 +34,7 @@ def generate_random_ticket() -> int:
 
 # Returns number of last log in the logs folder
 def find_last_log() -> int:
-    log_files = [path.name for path in Path(LOGS_FOLDER).glob("*.txt")]
+    log_files = [path.name for path in Path(LOGS_FOLDER).glob("log*.txt")]
     last_log = -1
     for name in log_files:
         num = int(name[name.find("log")+3 : name.find(".txt")])

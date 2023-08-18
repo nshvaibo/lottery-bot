@@ -346,9 +346,6 @@ def confirm_purchase(call: telebot.types.CallbackQuery):
     is_invited, who_invited = user.is_invited()
 
     if is_invited:
-        # Reward the user, who invited them
-        # TODO: reward
-
         # Reward the current user
         ticket = generate_random_ticket()
         user.add_ticket(ticket)
@@ -371,7 +368,7 @@ def confirm_purchase(call: telebot.types.CallbackQuery):
         reward_msg = message_templates[lang]["referrals"]["invitee_purchased_message"]
         bot.send_message(who_invited, reward_msg, reply_markup=menu_interface(lang))
         
-        # TODO: add a log message
+        logger.info(f"User {user_id} got a free ticket from {who_invited}")
     else:
         # Announce ticket numbers to the user
         success_msg = success_msg.format(referral_reward="")

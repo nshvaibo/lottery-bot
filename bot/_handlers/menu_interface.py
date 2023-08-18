@@ -4,6 +4,7 @@ from telebot.callback_data import CallbackData
 from bot._message_templates import message_templates
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 from special_users import daily_lottery_fund
+from wallet.ton import ton_rate
 
 menu_factory = CallbackData("section", prefix="menu")
 def menu_interface(lang: str):
@@ -59,5 +60,6 @@ def back_to_menu(bot, message, lang: str):
 
     # Go back to main menu
     jackpot = daily_lottery_fund.get_balance()
-    main_menu_msg = message_templates[lang]["menu"]["menu_message"].format(jackpot=jackpot, jackpot_usd=666666)
+    exchange_rate = ton_rate.get_rate()
+    main_menu_msg = message_templates[lang]["menu"]["menu_message"].format(jackpot=jackpot, jackpot_usd=jackpot*exchange_rate)
     bot.edit_message_text(main_menu_msg, chat_id, message_id, reply_markup=menu_interface(lang))

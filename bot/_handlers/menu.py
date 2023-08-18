@@ -23,13 +23,13 @@ def menu_callback(call: telebot.types.CallbackQuery):
         goto_wallet_menu(chat_id, lang, message_id)
     elif callback_data["section"] == "rules":
         rules_msg = message_templates[lang]["rules"]["message"]
-        bot.edit_message_text(rules_msg, chat_id, message_id, reply_markup=back_to_main_menu_interface(lang))
+        bot.edit_message_text(rules_msg, chat_id, message_id, reply_markup=back_to_main_menu_interface(lang), parse_mode="HTML")
     elif callback_data["section"] == "referrals":
         user = User(chat_id)
         ref_link = user.get_ref_link()
         referrals_msg = message_templates[lang]["referrals"]["referrals_menu_message"]
         referrals_msg = referrals_msg.format(ref_link=ref_link)
-        bot.edit_message_text(referrals_msg, chat_id, message_id, reply_markup=back_to_main_menu_interface(lang))
+        bot.edit_message_text(referrals_msg, chat_id, message_id, reply_markup=back_to_main_menu_interface(lang), parse_mode="HTML")
     elif callback_data["section"] == "back_to_menu":
         back_to_menu(bot, call.message, lang)
     else:

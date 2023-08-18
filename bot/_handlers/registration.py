@@ -8,6 +8,7 @@ from special_users import daily_lottery_fund
 from user import User
 from referrals import Referrals
 from config import LOGGER_NAME
+from wallet.ton import ton_rate
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -23,7 +24,8 @@ def command_start(message):
     # If user hasn't used the "/start" command yet:
     if user.is_first_time_user():
         jackpot = daily_lottery_fund.get_balance()
-        welcome_msg = message_templates[lang]["general_messages"]["welcome_message"].format(jackpot=jackpot, jackpot_usd=666666)
+        exchange_rate = ton_rate.get_rate()
+        welcome_msg = message_templates[lang]["general_messages"]["welcome_message"].format(jackpot=jackpot, jackpot_usd=jackpot*exchange_rate)
         args = message.text.split()
 
         if len(args) == 2:

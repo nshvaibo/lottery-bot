@@ -195,7 +195,7 @@ def goto_tickets_menu(chat_id, lang, message_id):
     )
     
     # Report status to the user
-    bot.edit_message_text(menu_msg, chat_id, message_id, reply_markup=tickets_interface(lang))
+    bot.edit_message_text(menu_msg, chat_id, message_id, reply_markup=tickets_interface(lang), parse_mode="HTML")
 
 @bot.callback_query_handler(func=tickets_factory.filter(number="-1").check)
 def buy_tickets_callback(call: telebot.types.CallbackQuery):
@@ -217,7 +217,7 @@ def buy_tickets_callback(call: telebot.types.CallbackQuery):
         bot.set_state(call.message.chat.id, WalletStates.buying_tickets, call.message.chat.id)
 
         # Change interface to selecting the number of tickets
-        bot.edit_message_text(buy_prompt, chat_id, message_id, reply_markup=cart_interface(lang))
+        bot.edit_message_text(buy_prompt, chat_id, message_id, reply_markup=cart_interface(lang), parse_mode="HTML")
         logger.info(f"User {user_id} requested to buy tickets")
     elif callback_data["operation"] == "goto_wallet_menu":
         goto_wallet_menu(chat_id, lang, message_id)
